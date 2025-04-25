@@ -99,7 +99,7 @@ Matrix4x4 Inverse(const Matrix4x4& a) {
 		a.m[0][1] * a.m[1][0] * a.m[2][2] * a.m[3][3] + a.m[0][0] * a.m[1][1] * a.m[2][2] * a.m[3][3];
 
 	if (det == 0.0f){
-		return result;
+		return result = {};
 	}
 	float invDet = 1.0f / det;
 
