@@ -1,0 +1,76 @@
+﻿#pragma once
+#include <Novice.h>
+#include <cmath>
+#include <assert.h>
+
+class Calculation{
+public:
+
+	struct Vector3{
+		float x, y, z;
+	};
+
+	struct Matrix4x4 {
+		float m[4][4];
+	};
+
+	Vector3 translate = {};
+	Vector3 scale = {};
+	Vector3 rotate = {};
+	Vector3 point = {};
+
+	Matrix4x4 m1 = {};
+	Matrix4x4 m2 = {};
+	Matrix4x4 transformationMatrix = {};
+
+	static const int kColumnWidth = 60;
+	static const int kRowHeight = 20;
+	// 加算
+	Vector3 Add(const Vector3& a, const Vector3& b);
+	// 減算
+	Vector3 Subtract(const Vector3& a, const Vector3& b);
+	// スカラー倍
+	Vector3 Multiply(float b, const Vector3& a);
+	// 内積
+	float Dot(const Vector3& a, const Vector3& b);
+	// 長さ(ノルム)
+	float Length(const Vector3& a);
+	// 正規化
+	Vector3 Normalize(const Vector3& a);
+
+	
+	void VectorScreenPrintf(int x, int y, const Vector3& vector, const char* label);
+
+
+	//１.行列の加法
+	Matrix4x4 Add(const Matrix4x4& a, const Matrix4x4& b);
+	//２.行列の減法
+	Matrix4x4 Subtract(const Matrix4x4& a, const Matrix4x4& b);
+	//３.行列の積
+	Matrix4x4 Multiply(const Matrix4x4& a, const Matrix4x4& b);
+	//４.逆行列
+	Matrix4x4 Inverse(const Matrix4x4& a);
+	//５.転倒行列
+	Matrix4x4 Transpose(const Matrix4x4& a);
+	//６.単項行列の作成
+	Matrix4x4 MakeIdentity4x4();
+
+	Matrix4x4 MakeScaleMatrix(const Vector3& scale);
+
+	//平行移動行列
+	Matrix4x4 MakeTranslationMatrix(const Vector3& translate);
+
+	//座標変換行列
+	Vector3 Transform(const Vector3& vector, Matrix4x4& matrix);
+
+	//1.X軸回転行列
+	Matrix4x4 MakeRotationXMatrix(float radian);
+	//2.Y軸回転行列
+	Matrix4x4 MakeRotationYMatrix(float radian);
+	//3.Z軸回転行列
+	Matrix4x4 MakeRotationZMatrix(float radian);
+
+	void MatrixScreenPrintf(int x, int y, const Matrix4x4& matrix, const char* label);
+
+};
+
