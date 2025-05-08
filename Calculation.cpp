@@ -348,6 +348,24 @@ Calculation::Matrix4x4 Calculation::MakeRotationZMatrix(float radian){
 	return result;
 }
 
+Calculation::Matrix4x4 Calculation::MakeAffineMatrix(const Vector3& Scale, const Vector3& Rotate, const Vector3& Translate){
+	Matrix4x4 result;
+	
+	Matrix4x4 scaleMatrix = MakeScaleMatrix(Scale);
+	Matrix4x4 rotateXMatrix = MakeRotationXMatrix(Rotate.x);
+	Matrix4x4 rotateYMatrix = MakeRotationYMatrix(Rotate.y);
+	Matrix4x4 rotateZMatrix = MakeRotationZMatrix(Rotate.z);
+	Matrix4x4 translationMatrix = MakeTranslationMatrix(Translate);
+
+	result = Multiply(scaleMatrix, rotateXMatrix);
+	result = Multiply(result, rotateYMatrix);
+	result = Multiply(result, rotateZMatrix);
+	result = Multiply(result, translationMatrix);
+
+	// 結果を返す
+	return result;
+}
+
 void Calculation::MatrixScreenPrintf(int x, int y, const Matrix4x4& matrix, const char* label){
 	for (int row = 0; row < 4; ++row) {
 		if (row == 0) {
