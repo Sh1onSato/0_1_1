@@ -30,9 +30,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	  3.3f, 9.9f, 8.8f, 2.2f
 	};*/
 
-	calculation->scale = { 1.2f, 0.79f, -2.1f };
+	/*calculation->scale = { 1.2f, 0.79f, -2.1f };
 	calculation->rotate = { 0.4f, 1.43f, -0.8f };
-	calculation->translate = { 2.7f, -4.15f, 1.57f };
+	calculation->translate = { 2.7f, -4.15f, 1.57f };*/
 
 	/*calculation->point = { 2.3f, 3.8f, 1.4f };*/
 
@@ -43,6 +43,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		1.0f,4.0f,2.0f,3.0f,
 		2.0f,2.0f,1.0f,3.0f
 	};*/
+	Calculation::Matrix4x4 orthograhicMatrix = calculation->MakeOrthographicMatrix(-160.0f, 160.0f, 200.0f, 300.0f, 0.0f, 1000.0f);
+	Calculation::Matrix4x4 perspectiveMatrix = calculation->MakePerspectiveFovMatrix(0.63f, 1.33f, 0.1f, 1000.0f);
+	Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(100.0f, 200.0f, 600.0, 300.0f,0.0f, 1.0f);
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -60,7 +64,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Calculation::Matrix4x4 rotateZMatrix = calculation->MakeRotationZMatrix(calculation->rotate.z);
 		Calculation::Matrix4x4 rotateXYZMatrix = calculation->Multiply(rotateXMatrix, calculation->Multiply(rotateYMatrix, rotateZMatrix));*/
 		
-		Calculation::Matrix4x4 worldMatrix = calculation->MakeAffineMatrix(calculation->scale, calculation->rotate, calculation->translate);
+		/*Calculation::Matrix4x4 worldMatrix = calculation->MakeAffineMatrix(calculation->scale, calculation->rotate, calculation->translate);*/
+
+		
 		///
 		/// ↑更新処理ここまで
 		///
@@ -74,7 +80,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		calculation->MatrixScreenPrintf(0, calculation->kRowHeight * 10, rotateZMatrix, "rotateZMatrix");
 		calculation->MatrixScreenPrintf(0, calculation->kRowHeight * 15, rotateXYZMatrix, "rotateXYZMatrix");*/
 		///
-		calculation->MatrixScreenPrintf(0, 0, worldMatrix, "worldMatrix");
+		/*calculation->MatrixScreenPrintf(0, 0, worldMatrix, "worldMatrix");*/
+
+		calculation->MatrixScreenPrintf(0, 0, orthograhicMatrix, "orthograhicMatrix");
+		calculation->MatrixScreenPrintf(0, calculation->kRowHeight * 5, perspectiveMatrix, "perspectiveMatrix");
+		calculation->MatrixScreenPrintf(0, calculation->kRowHeight * 10, viewportMatrix, "viewportMatrix");
 		/// ↑描画処理ここまで
 		///
 
