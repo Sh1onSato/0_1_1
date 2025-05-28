@@ -1,7 +1,7 @@
 #include"Calculation.h"
 #include <Novice.h>
 
-const char kWindowTitle[] = "LE2C_08_サトウ_シオン";
+const char kWindowTitle[] = "LE2C_12_サトウ_シオン";
 
 
 // Windowsアプリでのエントリーポイント(main関数)
