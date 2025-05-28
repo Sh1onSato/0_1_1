@@ -459,5 +459,14 @@ void Calculation::MatrixScreenPrintf(int x, int y, const Matrix4x4& matrix, cons
 		}
 
 	}
-};
+}
+Calculation::Vector3 Calculation::Cross(const Vector3& a, const Vector3& b){
+	Vector3 result;
+	result.x = a.y * b.z - a.z * b.y;
+	result.y = a.z * b.x - a.x * b.z;
+	result.z = a.x * b.y - a.y * b.x;
+
+	return result;
+	
+}
 

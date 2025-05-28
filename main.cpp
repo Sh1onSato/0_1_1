@@ -1,7 +1,7 @@
 #include"Calculation.h"
 #include <Novice.h>
 
-const char kWindowTitle[] = "LE2C_08_サトウ_シオン";
+const char kWindowTitle[] = "LE2C_12_サトウ_シオン";
 
 
 // Windowsアプリでのエントリーポイント(main関数)
@@ -43,10 +43,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		1.0f,4.0f,2.0f,3.0f,
 		2.0f,2.0f,1.0f,3.0f
 	};*/
-	Calculation::Matrix4x4 orthograhicMatrix = calculation->MakeOrthographicMatrix(-160.0f, 160.0f, 200.0f, 300.0f, 0.0f, 1000.0f);
+	/*Calculation::Matrix4x4 orthograhicMatrix = calculation->MakeOrthographicMatrix(-160.0f, 160.0f, 200.0f, 300.0f, 0.0f, 1000.0f);
 	Calculation::Matrix4x4 perspectiveMatrix = calculation->MakePerspectiveFovMatrix(0.63f, 1.33f, 0.1f, 1000.0f);
-	Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(100.0f, 200.0f, 600.0, 300.0f,0.0f, 1.0f);
+	Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(100.0f, 200.0f, 600.0, 300.0f,0.0f, 1.0f);*/
 
+	Calculation::Vector3 v1 = { 1.2f,-3.9f,2.0f };
+	Calculation::Vector3 v2 = { 2.8f,0.4f,-1.3f };
+	Calculation::Vector3 cross = calculation->Cross(v1, v2);
+
+	Calculation::Vector3 rotate{};
+	Calculation::Vector3 translate{};
+	Calculation::Vector3 cameraPosition{ 0.0f, 0.0f, -10.0f };
+
+	Calculation::Vector3 kLocalVertices[3] = {
+		{ 0.0f, 1.0f, 0.0f },
+		{ -1.0f, -1.0f, 0.0f },
+		{ 1.0f, -1.0f, 0.0f }
+	};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -66,7 +79,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 		/*Calculation::Matrix4x4 worldMatrix = calculation->MakeAffineMatrix(calculation->scale, calculation->rotate, calculation->translate);*/
 
-		
+		if (keys[DIK_W])
+		{
+			translate.z += 0.1f;
+		}
+		else if (keys[DIK_S])
+		{
+			translate.z -= 0.1f;
+		}
+		else if (keys[DIK_A])
+		{
+			translate.x -= 0.1f;
+		}
+		else if (keys[DIK_D])
+		{
+			translate.x += 0.1f;
+		}
+
+		rotate.y -= 0.03f;
+
+		Calculation::Matrix4x4 worldMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, rotate, translate);
+		Calculation::Matrix4x4 cameraMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, cameraPosition);
+		Calculation::Matrix4x4 viewMatrix = calculation->Inverse(cameraMatrix);
+		Calculation::Matrix4x4 projectionMatrix = calculation->MakePerspectiveFovMatrix(0.45f, 1280.0f/720.0f, 0.1f, 100.0f);
+		Calculation::Matrix4x4 worldViewProjectionMatrix = calculation->Multiply(worldMatrix, calculation->Multiply(viewMatrix,projectionMatrix));
+		Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 1.0f);
+		Calculation::Vector3 screenVertics[3];
+		for (uint32_t i = 0; i < 3; ++i) {
+			Calculation::Vector3 ndcVertex = calculation->Transform(kLocalVertices[i], worldViewProjectionMatrix);
+			screenVertics[i] = calculation->Transform(ndcVertex, viewportMatrix);
+		}
+
 		///
 		/// ↑更新処理ここまで
 		///
@@ -82,9 +125,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/*calculation->MatrixScreenPrintf(0, 0, worldMatrix, "worldMatrix");*/
 
-		calculation->MatrixScreenPrintf(0, 0, orthograhicMatrix, "orthograhicMatrix");
+		/*calculation->MatrixScreenPrintf(0, 0, orthograhicMatrix, "orthograhicMatrix");
 		calculation->MatrixScreenPrintf(0, calculation->kRowHeight * 5, perspectiveMatrix, "perspectiveMatrix");
-		calculation->MatrixScreenPrintf(0, calculation->kRowHeight * 10, viewportMatrix, "viewportMatrix");
+		calculation->MatrixScreenPrintf(0, calculation->kRowHeight * 10, viewportMatrix, "viewportMatrix");*/
+		
+		calculation->VectorScreenPrintf(0, 0, cross, "cross");
+		Novice::DrawTriangle(int(screenVertics[0].x), int(screenVertics[0].y),
+			int(screenVertics[1].x), int(screenVertics[1].y),
+			int(screenVertics[2].x), int(screenVertics[2].y),
+			RED, kFillModeSolid);
+
 		/// ↑描画処理ここまで
 		///
 
