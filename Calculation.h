@@ -82,5 +82,8 @@ public:
 
 	void MatrixScreenPrintf(int x, int y, const Matrix4x4& matrix, const char* label);
 
+	// クロス積
+	Vector3 Cross(const Vector3& a, const Vector3& b);
+
 };
 
