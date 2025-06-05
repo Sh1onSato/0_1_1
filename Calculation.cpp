@@ -1,5 +1,6 @@
 ﻿#include "Calculation.h"
-
+#include <cmath> 
+#include <numbers> 
 
 Calculation::Vector3 Calculation::Add(const Vector3& a, const Vector3& b){
 	return { a.x + b.x, a.y + b.y, a.z + b.z };
@@ -243,7 +244,7 @@ Calculation::Matrix4x4 Calculation::MakeTranslationMatrix(const Vector3& Transla
 	return result;
 }
 
-Calculation::Vector3 Calculation::Transform(const Vector3& vector, Matrix4x4& matrix){
+Calculation::Vector3 Calculation::Transform(const Vector3& vector,const  Matrix4x4& matrix){
 	Vector3 result;
 	// 行列とベクトルの積を計算
 	result.x = vector.x * matrix.m[0][0] + vector.y * matrix.m[1][0] + vector.z * matrix.m[2][0] + matrix.m[3][0];
@@ -468,5 +469,78 @@ Calculation::Vector3 Calculation::Cross(const Vector3& a, const Vector3& b){
 
 	return result;
 	
+}
+
+void Calculation::DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) {
+	const uint32_t kSubdivisions = 16;
+	const float kLonEvery = float(2 * std::numbers::pi) / kSubdivisions;
+	const float kLotEvery = float(std::numbers::pi) / kSubdivisions;
+	for (uint32_t lotIndex = 0; lotIndex < kLotEvery; ++lotIndex) {
+		float lat = float(-std::numbers::pi) / 2 + lotIndex * kLotEvery;
+		for (uint32_t lonIndex = 0; lonIndex < kSubdivisions; ++lonIndex) {
+			float lon = lonIndex * kLonEvery;
+			Vector3 a, b, c;
+			a = {
+			   sphere.center.x + sphere.radius * cosf(lat) * cosf(lon),
+			   sphere.center.y + sphere.radius * sinf(lat),
+			   sphere.center.z + sphere.radius * cosf(lat) * sinf(lon)
+			};
+
+			b = {
+				sphere.center.x + sphere.radius * cosf(lat + kLotEvery) * cosf(lon),
+				sphere.center.y + sphere.radius * sinf(lat + kLotEvery),
+				sphere.center.z + sphere.radius * cosf(lat + kLotEvery) * sinf(lon)
+			};
+
+			c = {
+				sphere.center.x + sphere.radius * cosf(lat) * cosf(lon + kLonEvery),
+				sphere.center.y + sphere.radius * sinf(lat),
+				sphere.center.z + sphere.radius * cosf(lat) * sinf(lon + kLonEvery)
+			};
+
+			Vector3 screenA = Transform(Transform(a, viewProjectionMatrix), viewportMatrix);
+			Vector3 screenB = Transform(Transform(b, viewProjectionMatrix), viewportMatrix);
+			Vector3 screenC = Transform(Transform(c, viewProjectionMatrix), viewportMatrix);
+
+			Novice::DrawLine(int(screenA.x), int(screenA.y), int(screenB.x), int(screenB.y), color);
+			Novice::DrawLine(int(screenA.x), int(screenA.y), int(screenC.x), int(screenC.y), color);
+		}
+	}
+}
+
+void Calculation::DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix){
+	const float  kGridHalfWidth = 2.0f;
+
+	const uint32_t kSubdivision = 10;
+
+	const float kGridEvery = (kGridHalfWidth * 2.0f) / float(kSubdivision);
+
+	for (uint32_t xIndex = 0; xIndex <= kSubdivision; ++xIndex){
+		float x = -kGridHalfWidth + kGridEvery * xIndex;
+
+		Vector3 start = { x, 0.0f, -kGridHalfWidth };
+
+		Vector3 end = { x, 0.0f, kGridHalfWidth };
+
+		Vector3 screenStart = Transform(Transform(start, viewProjectionMatrix), viewportMatrix);
+		Vector3 screenEnd = Transform(Transform(end, viewProjectionMatrix), viewportMatrix);
+
+		Novice::DrawLine(int(screenStart.x), int(screenStart.y), int(screenEnd.x), int(screenEnd.y), 0xAAAAAAFF);
+	}
+
+	for (uint32_t zIndex = 0; zIndex <= kSubdivision; ++zIndex){
+
+		float z = -kGridHalfWidth + kGridEvery * zIndex;
+
+		Vector3 start = { -kGridHalfWidth, 0.0f, z };
+		Vector3 end = { kGridHalfWidth, 0.0f, z };
+
+		Vector3 screenStart = Transform(Transform(start, viewProjectionMatrix), viewportMatrix);
+		Vector3 screenEnd = Transform(Transform(end, viewProjectionMatrix), viewportMatrix);
+
+		//変換した座標を使って描画
+		Novice::DrawLine(int(screenStart.x), int(screenStart.y), int(screenEnd.x), int(screenEnd.y), 0xAAAAAAFF);
+	}
+
 }
 

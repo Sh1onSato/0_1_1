@@ -14,6 +14,11 @@ public:
 		float m[4][4];
 	};
 
+	struct Sphere {
+		Vector3 center;
+		float radius;
+	};
+
 	Vector3 translate = {};
 	Vector3 scale = {};
 	Vector3 rotate = {};
@@ -61,7 +66,7 @@ public:
 	Matrix4x4 MakeTranslationMatrix(const Vector3& translate);
 
 	//座標変換行列
-	Vector3 Transform(const Vector3& vector, Matrix4x4& matrix);
+	Vector3 Transform(const Vector3& vector,const Matrix4x4& matrix);
 
 	//1.X軸回転行列
 	Matrix4x4 MakeRotationXMatrix(float radian);
@@ -85,5 +90,9 @@ public:
 	// クロス積
 	Vector3 Cross(const Vector3& a, const Vector3& b);
 
+
+	void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
+	
+	void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix);
 };
 
