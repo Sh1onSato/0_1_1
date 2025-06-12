@@ -70,7 +70,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	uint32_t color = 0xFFFFFFFF;
 
-	Calculation::Sphere sphere;
+	Calculation::Sphere sphere= {0.0f,0.0f,- 1.0f,1.0f};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始

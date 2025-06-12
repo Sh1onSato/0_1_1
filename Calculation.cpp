@@ -481,9 +481,9 @@ void Calculation::DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjecti
 			float lon = lonIndex * kLonEvery;
 			Vector3 a, b, c;
 			a = {
-			   sphere.center.x + sphere.radius * cosf(lat) * cosf(lon),
-			   sphere.center.y + sphere.radius * sinf(lat),
-			   sphere.center.z + sphere.radius * cosf(lat) * sinf(lon)
+			   sphere.center.x + sphere.radius * cosf(lat + kLonEvery) * cosf(lon),
+			   sphere.center.y + sphere.radius * sinf(lat + kLonEvery),
+			   sphere.center.z + sphere.radius * cosf(lat + kLonEvery) * sinf(lon)
 			};
 
 			b = {
