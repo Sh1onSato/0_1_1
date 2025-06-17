@@ -17,6 +17,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Calculation* calculation = new Calculation();
 
+	Calculation::Segment segment
+	{
+		{-2.0f,-1.0f, 0.0f},
+		{ 3.0f, 2.0f, 2.0f}
+	};
+
 	/*calculation->m1 =
 	{ 3.2f, 0.7f, 9.6f, 4.4f,
 	  5.5f, 1.3f, 7.8f, 2.1f,
@@ -62,15 +68,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{ 1.0f, -1.0f, 0.0f }
 	};*/
 
+	Calculation::Vector3 point{ -1.5f,0.6f,0.6f };
+
 	Calculation::Vector3 cameraRotate{ -0.26f,0.0f,0.0f };
 
 	Calculation::Vector3 cameraTranslate{ 0.0f,1.9f,-6.49f };
 
 	Calculation::Vector3 cameraPosition{ 0.0f, 0.0f, 8.0f };
 
-	uint32_t color = 0xFFFFFFFF;
+	/*uint32_t color = 0xFFFFFFFF;*/
 
-	Calculation::Sphere sphere= {0.0f,0.0f,- 1.0f,1.0f};
+	Calculation::Sphere sphere= {0.0f,0.0f ,- 1.0f,1.0f};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -109,18 +117,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		rotate.y -= 0.03f;*/
 
-		Calculation::Matrix4x4 worldMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, cameraRotate, cameraTranslate);
-		Calculation::Matrix4x4 cameraMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, cameraPosition);
-		Calculation::Matrix4x4 viewMatrix = calculation->Inverse(cameraMatrix);
-		Calculation::Matrix4x4 projectionMatrix = calculation->MakePerspectiveFovMatrix(0.45f, 1280.0f/720.0f, 0.1f, 100.0f);
-		Calculation::Matrix4x4 worldViewProjectionMatrix = calculation->Multiply(worldMatrix, calculation->Multiply(viewMatrix,projectionMatrix));
-		Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 1.0f);
+		//Calculation::Matrix4x4 worldMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, cameraRotate, cameraTranslate);
+		//Calculation::Matrix4x4 cameraMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, cameraPosition);
+		//Calculation::Matrix4x4 viewMatrix = calculation->Inverse(cameraMatrix);
+		//Calculation::Matrix4x4 projectionMatrix = calculation->MakePerspectiveFovMatrix(0.45f, 1280.0f/720.0f, 0.1f, 100.0f);
+		//Calculation::Matrix4x4 worldViewProjectionMatrix = calculation->Multiply(worldMatrix, calculation->Multiply(viewMatrix,projectionMatrix));
+		//Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 1.0f);
 	/*	Calculation::Vector3 screenVertics[3];*/
 		//for (uint32_t i = 0; i < 3; ++i) {
 		//	Calculation::Vector3 ndcVertex = calculation->Transform(kLocalVertices[i], worldViewProjectionMatrix);
 		//	screenVertics[i] = calculation->Transform(ndcVertex, viewportMatrix);
 		//}
+		Calculation::Vector3 project = calculation->project(calculation->Subtract(point, segment.origin), segment.diff);
 
+		Calculation::Vector3 closesPoint = calculation->Closestpoint(point, segment);
+
+		Calculation::Matrix4x4 cameraMatrix = calculation->MakeAffineMatrix({ 1.0f,1.0f,1.0f }, cameraRotate, cameraPosition);
+		Calculation::Matrix4x4 viewMatrix = calculation->Inverse(cameraMatrix);
+		Calculation::Matrix4x4 projectionMatrix = calculation->MakePerspectiveFovMatrix(0.45f, 1280.0f /720.0f, 0.1f, 100.0f);
+		//WVPMatrixの作成
+		Calculation::Matrix4x4 ViewProjectionMatrix = calculation->Multiply(viewMatrix, projectionMatrix);
+		//viewPortMatrixの作成
+		Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(0, 0, 1280.0f , 720.0f, 0.0f, 1.0f);
 
 		ImGui::Begin("window");
 		ImGui::DragFloat3("CameraTranslate", &cameraTranslate.x, 0.01f);
@@ -154,9 +172,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			int(screenVertics[2].x), int(screenVertics[2].y),
 			RED, kFillModeSolid);*/
 
-		calculation->DrawGrid(worldViewProjectionMatrix, viewportMatrix);
+		/*calculation->DrawGrid(worldViewProjectionMatrix, viewportMatrix);
 
-		calculation->DrawSphere(sphere, worldViewProjectionMatrix, viewportMatrix, color);
+		calculation->DrawSphere(sphere, worldViewProjectionMatrix, viewportMatrix, color);*/
+		
+		Calculation::Sphere pointSphere{ point,0.01f };
+
+		Calculation::Sphere closesPointsphere{ closesPoint,0.01f };
+
+		calculation->DrawSphere(pointSphere, ViewProjectionMatrix, viewportMatrix, RED);
+
+		calculation->DrawSphere(closesPointsphere, ViewProjectionMatrix, viewportMatrix, BLACK);
+
+		calculation->DrawGrid(ViewProjectionMatrix, viewportMatrix);
+
+		//DrawSphere(sphere, ViewProjectionMatrix, viewportMatrix, color);
+
+		Calculation::Vector3 start = calculation->Transform(calculation->Transform(segment.origin, ViewProjectionMatrix), viewportMatrix);
+
+		Calculation::Vector3 end = calculation->Transform(calculation->Transform(calculation->Add(segment.origin, segment.diff), ViewProjectionMatrix), viewportMatrix);
+
+		Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), WHITE);
+
+		ImGui::InputFloat3("Project", &project.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
+		
 		/// ↑描画処理ここまで
 		///
 

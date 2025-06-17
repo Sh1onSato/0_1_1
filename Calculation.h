@@ -19,10 +19,15 @@ public:
 		float radius;
 	};
 
+	struct Segment
+	{
+		Vector3 origin;
+		Vector3 diff;
+	};
+
 	Vector3 translate = {};
 	Vector3 scale = {};
 	Vector3 rotate = {};
-	Vector3 point = {};
 
 	Matrix4x4 m1 = {};
 	Matrix4x4 m2 = {};
@@ -35,7 +40,7 @@ public:
 	// 減算
 	Vector3 Subtract(const Vector3& a, const Vector3& b);
 	// スカラー倍
-	Vector3 Multiply(float b, const Vector3& a);
+	Vector3 Multiply(const Vector3& a,float b);
 	// 内積
 	float Dot(const Vector3& a, const Vector3& b);
 	// 長さ(ノルム)
@@ -94,5 +99,9 @@ public:
 	void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 	
 	void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix);
+
+	Vector3 project(const Vector3& v1, const Vector3& v2);
+	
+	Vector3 Closestpoint(const Vector3& point, const Segment& segment);
 };
 

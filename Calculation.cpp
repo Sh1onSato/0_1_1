@@ -10,7 +10,7 @@ Calculation::Vector3 Calculation::Subtract(const Vector3& a, const Vector3& b) {
 	return { a.x - b.x, a.y - b.y, a.z - b.z };
 }
 
-Calculation::Vector3 Calculation::Multiply(float b, const Vector3& a){
+Calculation::Vector3 Calculation::Multiply(const Vector3& a, float b){
 	return { a.x * b, a.y * b, a.z * b };
 }
 float Calculation::Dot(const Vector3& a, const Vector3& b) {
@@ -473,8 +473,8 @@ Calculation::Vector3 Calculation::Cross(const Vector3& a, const Vector3& b){
 
 void Calculation::DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) {
 	const uint32_t kSubdivisions = 16;
-	const float kLonEvery = float(2 * std::numbers::pi) / kSubdivisions;
-	const float kLotEvery = float(std::numbers::pi) / kSubdivisions;
+	const float kLonEvery = float(2 * std::numbers::pi) / float(kSubdivisions);
+	const float kLotEvery = float(std::numbers::pi) / float(kSubdivisions);
 	for (uint32_t lotIndex = 0; lotIndex < kLotEvery; ++lotIndex) {
 		float lat = float(-std::numbers::pi) / 2 + lotIndex * kLotEvery;
 		for (uint32_t lonIndex = 0; lonIndex < kSubdivisions; ++lonIndex) {
@@ -542,5 +542,33 @@ void Calculation::DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x
 		Novice::DrawLine(int(screenStart.x), int(screenStart.y), int(screenEnd.x), int(screenEnd.y), 0xAAAAAAFF);
 	}
 
+}
+
+Calculation::Vector3 Calculation::project(const Vector3& v1, const Vector3& v2){
+	float v2LenSq = Dot(v2, v2);
+
+	if (v2LenSq == 0.0f)
+	{
+		return { 0, 0, 0 };
+	};
+
+	float t = Dot(v1, v2) / v2LenSq;
+	return Multiply(v2, t);
+}
+
+Calculation::Vector3 Calculation::Closestpoint(const Vector3& point, const Segment& segment){
+	Vector3 toPoint = Subtract(point, segment.origin);
+	float segLenSq = Dot(segment.diff, segment.diff);
+	if (segLenSq == 0.0f){
+		return segment.origin;
+	}
+	float t = Dot(toPoint, segment.diff) / segLenSq;
+
+	// t を 0 ～ 1 にクランプ
+	if (t < 0.0f) t = 0.0f;
+	if (t > 1.0f) t = 1.0f;
+
+	// 最近接点 = origin + diff * t
+	return Add(segment.origin, Multiply(segment.diff, t));
 }
 
