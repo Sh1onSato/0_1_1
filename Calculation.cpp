@@ -474,9 +474,9 @@ Calculation::Vector3 Calculation::Cross(const Vector3& a, const Vector3& b){
 void Calculation::DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) {
 	const uint32_t kSubdivisions = 16;
 	const float kLonEvery = float(2 * std::numbers::pi) / kSubdivisions;
-	const float kLotEvery = float(std::numbers::pi) / kSubdivisions;
-	for (uint32_t lotIndex = 0; lotIndex < kLotEvery; ++lotIndex) {
-		float lat = float(-std::numbers::pi) / 2 + lotIndex * kLotEvery;
+	const float kLatEvery = float(std::numbers::pi) / kSubdivisions;
+	for (uint32_t lotIndex = 0; lotIndex < kSubdivisions; ++lotIndex) {
+		float lat = float(-std::numbers::pi) / 2 + lotIndex * kLatEvery;
 		for (uint32_t lonIndex = 0; lonIndex < kSubdivisions; ++lonIndex) {
 			float lon = lonIndex * kLonEvery;
 			Vector3 a, b, c;
@@ -487,9 +487,9 @@ void Calculation::DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjecti
 			};
 
 			b = {
-				sphere.center.x + sphere.radius * cosf(lat + kLotEvery) * cosf(lon),
-				sphere.center.y + sphere.radius * sinf(lat + kLotEvery),
-				sphere.center.z + sphere.radius * cosf(lat + kLotEvery) * sinf(lon)
+				sphere.center.x + sphere.radius * cosf(lat + kLatEvery) * cosf(lon),
+				sphere.center.y + sphere.radius * sinf(lat + kLatEvery),
+				sphere.center.z + sphere.radius * cosf(lat + kLatEvery) * sinf(lon)
 			};
 
 			c = {

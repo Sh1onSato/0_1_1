@@ -28,8 +28,8 @@ public:
 	Matrix4x4 m2 = {};
 	Matrix4x4 transformationMatrix = {};
 
-	static const int kColumnWidth = 60;
-	static const int kRowHeight = 20;
+	static const int kColumnWidth = 1280;
+	static const int kRowHeight = 720;
 	// 加算
 	Vector3 Add(const Vector3& a, const Vector3& b);
 	// 減算

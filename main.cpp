@@ -17,6 +17,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Calculation* calculation = new Calculation();
 
+	Calculation::Sphere sphere{ {0.0f, 0.0f, 0.5f}, 1.0f };
 	/*calculation->m1 =
 	{ 3.2f, 0.7f, 9.6f, 4.4f,
 	  5.5f, 1.3f, 7.8f, 2.1f,
@@ -70,7 +71,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	uint32_t color = 0xFFFFFFFF;
 
-	Calculation::Sphere sphere;
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -112,9 +112,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Calculation::Matrix4x4 worldMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, cameraRotate, cameraTranslate);
 		Calculation::Matrix4x4 cameraMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, cameraPosition);
 		Calculation::Matrix4x4 viewMatrix = calculation->Inverse(cameraMatrix);
-		Calculation::Matrix4x4 projectionMatrix = calculation->MakePerspectiveFovMatrix(0.45f, 1280.0f/720.0f, 0.1f, 100.0f);
+		Calculation::Matrix4x4 projectionMatrix = calculation->MakePerspectiveFovMatrix(0.45f, calculation->kColumnWidth/calculation->kRowHeight, 0.1f, 100.0f);
 		Calculation::Matrix4x4 worldViewProjectionMatrix = calculation->Multiply(worldMatrix, calculation->Multiply(viewMatrix,projectionMatrix));
-		Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 1.0f);
+		Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(0.0f, 0.0f, calculation->kColumnWidth, calculation->kRowHeight, 0.0f, 1.0f);
 	/*	Calculation::Vector3 screenVertics[3];*/
 		//for (uint32_t i = 0; i < 3; ++i) {
 		//	Calculation::Vector3 ndcVertex = calculation->Transform(kLocalVertices[i], worldViewProjectionMatrix);
