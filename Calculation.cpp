@@ -473,23 +473,23 @@ Calculation::Vector3 Calculation::Cross(const Vector3& a, const Vector3& b){
 
 void Calculation::DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) {
 	const uint32_t kSubdivisions = 16;
-	const float kLonEvery = float(2 * std::numbers::pi) / float(kSubdivisions);
-	const float kLotEvery = float(std::numbers::pi) / float(kSubdivisions);
-	for (uint32_t lotIndex = 0; lotIndex < kLotEvery; ++lotIndex) {
-		float lat = float(-std::numbers::pi) / 2 + lotIndex * kLotEvery;
+	const float kLonEvery = float(2 * std::numbers::pi) / kSubdivisions;
+	const float kLatEvery = float(std::numbers::pi) / kSubdivisions;
+	for (uint32_t lotIndex = 0; lotIndex < kSubdivisions; ++lotIndex) {
+		float lat = float(-std::numbers::pi) / 2 + lotIndex * kLatEvery;
 		for (uint32_t lonIndex = 0; lonIndex < kSubdivisions; ++lonIndex) {
 			float lon = lonIndex * kLonEvery;
 			Vector3 a, b, c;
 			a = {
-			   sphere.center.x + sphere.radius * cosf(lat + kLonEvery) * cosf(lon),
-			   sphere.center.y + sphere.radius * sinf(lat + kLonEvery),
-			   sphere.center.z + sphere.radius * cosf(lat + kLonEvery) * sinf(lon)
+			   sphere.center.x + sphere.radius * cosf(lat) * cosf(lon),
+			   sphere.center.y + sphere.radius * sinf(lat),
+			   sphere.center.z + sphere.radius * cosf(lat) * sinf(lon)
 			};
 
 			b = {
-				sphere.center.x + sphere.radius * cosf(lat + kLotEvery) * cosf(lon),
-				sphere.center.y + sphere.radius * sinf(lat + kLotEvery),
-				sphere.center.z + sphere.radius * cosf(lat + kLotEvery) * sinf(lon)
+				sphere.center.x + sphere.radius * cosf(lat + kLatEvery) * cosf(lon),
+				sphere.center.y + sphere.radius * sinf(lat + kLatEvery),
+				sphere.center.z + sphere.radius * cosf(lat + kLatEvery) * sinf(lon)
 			};
 
 			c = {
@@ -508,14 +508,14 @@ void Calculation::DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjecti
 	}
 }
 
-void Calculation::DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix){
+void Calculation::DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix) {
 	const float  kGridHalfWidth = 2.0f;
 
 	const uint32_t kSubdivision = 10;
 
 	const float kGridEvery = (kGridHalfWidth * 2.0f) / float(kSubdivision);
 
-	for (uint32_t xIndex = 0; xIndex <= kSubdivision; ++xIndex){
+	for (uint32_t xIndex = 0; xIndex <= kSubdivision; ++xIndex) {
 		float x = -kGridHalfWidth + kGridEvery * xIndex;
 
 		Vector3 start = { x, 0.0f, -kGridHalfWidth };
@@ -528,7 +528,7 @@ void Calculation::DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x
 		Novice::DrawLine(int(screenStart.x), int(screenStart.y), int(screenEnd.x), int(screenEnd.y), 0xAAAAAAFF);
 	}
 
-	for (uint32_t zIndex = 0; zIndex <= kSubdivision; ++zIndex){
+	for (uint32_t zIndex = 0; zIndex <= kSubdivision; ++zIndex) {
 
 		float z = -kGridHalfWidth + kGridEvery * zIndex;
 
@@ -544,16 +544,15 @@ void Calculation::DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x
 
 }
 
-Calculation::Vector3 Calculation::project(const Vector3& v1, const Vector3& v2){
+Calculation::Vector3 Calculation::Project(const Vector3& v1, const Vector3& v2){
 	float v2LenSq = Dot(v2, v2);
 
-	if (v2LenSq == 0.0f)
-	{
+	if (v2LenSq == 0.0f){
 		return { 0, 0, 0 };
 	};
 
 	float t = Dot(v1, v2) / v2LenSq;
-	return Multiply(v2, t);
+	return Multiply(v2,t);
 }
 
 Calculation::Vector3 Calculation::Closestpoint(const Vector3& point, const Segment& segment){
@@ -564,11 +563,9 @@ Calculation::Vector3 Calculation::Closestpoint(const Vector3& point, const Segme
 	}
 	float t = Dot(toPoint, segment.diff) / segLenSq;
 
-	// t を 0 ～ 1 にクランプ
 	if (t < 0.0f) t = 0.0f;
 	if (t > 1.0f) t = 1.0f;
 
-	// 最近接点 = origin + diff * t
-	return Add(segment.origin, Multiply(segment.diff, t));
+	return Add(segment.origin, Multiply(segment.diff,t));
 }
 

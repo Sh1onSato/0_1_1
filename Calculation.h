@@ -40,7 +40,7 @@ public:
 	// 減算
 	Vector3 Subtract(const Vector3& a, const Vector3& b);
 	// スカラー倍
-	Vector3 Multiply(const Vector3& a,float b);
+	Vector3 Multiply(const Vector3& a, float b);
 	// 内積
 	float Dot(const Vector3& a, const Vector3& b);
 	// 長さ(ノルム)
@@ -100,7 +100,7 @@ public:
 	
 	void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix);
 
-	Vector3 project(const Vector3& v1, const Vector3& v2);
+	Vector3 Project(const Vector3& v1, const Vector3& v2);
 	
 	Vector3 Closestpoint(const Vector3& point, const Segment& segment);
 };
