@@ -1,6 +1,10 @@
 #include"Calculation.h"
 #include <Novice.h>
 #include<imgui.h>
+#include <iostream>
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/glm.hpp"
+#include "glm/gtx/norm.hpp"
 
 const char kWindowTitle[] = "LE2C_12_サトウ_シオン";
 
@@ -20,6 +24,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Calculation::Segment segment{
 		{-2.0f,-1.0f, 0.0f},
 		{ 3.0f, 2.0f, 2.0f}
+	};
+
+	struct Transform {
+		Calculation::Vector3 scale;
+		Calculation::Vector3 rotate;
+		Calculation::Vector3 translate;
 	};
 
 	/*calculation->m1 =
@@ -67,17 +77,39 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{ 1.0f, -1.0f, 0.0f }
 	};*/
 
-	Calculation::Vector3 point{ -1.5f,0.6f,0.6f };
+	//Calculation::Vector3 point{ -1.5f,0.6f,0.6f };
 
-	Calculation::Vector3 cameraRotate{ 0.26f,0.0f,0.0f };
+	//Calculation::Vector3 cameraRotate{ 0.26f,0.0f,0.0f };
 
 	/*Calculation::Vector3 cameraTranslate{ 0.0f,1.9f,-6.49f };*/
 
-	Calculation::Vector3 cameraPosition{ 0.0f, 1.9f, -6.25f };
+	/*Calculation::Vector3 cameraPosition{ 0.0f, 1.9f, -6.25f };*/
 
 	/*uint32_t color = 0xFFFFFFFF;*/
 
-	Calculation::Sphere sphere= {0.0f,0.0f ,- 1.0f,1.0f};
+	/*Calculation::Sphere sphere= {0.0f,0.0f ,- 1.0f,1.0f};*/
+
+	Calculation::Sphere sphere[2];
+	sphere[0].center = { 0.0f,0.0f ,0.6f };
+	sphere[0].radius = { 1.0f };
+	sphere[0].color = 0xFFFFFFFF;
+	sphere[1].center = { 1.7f,0.0f ,1.0f };
+	sphere[1].radius = { 0.4f };
+	sphere[1].color = 0xFFFFFFFF;
+
+	Transform  transform{
+	{1.0f,1.0f,1.0f},
+	{0.0f,0.0f,0.0f},
+	{0.0f,0.0f,0.0f},
+	};
+
+
+	Transform  cameraPosition{
+	{1.0f,1.0f,1.0f},
+	{ 0.26f,0.0f,0.0f },
+	{ 0.0f,1.9f,-6.25f },
+	};
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -115,6 +147,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 
 		rotate.y -= 0.03f;*/
+		Calculation::Vector3 diff_calc_vec = sphere[1].center - sphere[0].center;
+
+		float distance = glm::length(glm::vec3(diff_calc_vec.x, diff_calc_vec.y, diff_calc_vec.z));
+
+		if(distance < sphere[0].radius + sphere[1].radius) {
+			// 衝突している場合の処理
+			sphere[0].color = 0xFFFF00FF; // 赤色に変更
+		}
+		else {
+			// 衝突していない場合の処理
+			sphere[0].color = 0xFFFFFFFF; // 元の色に戻す
+		}
 
 		//Calculation::Matrix4x4 worldMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, cameraRotate, cameraTranslate);
 		//Calculation::Matrix4x4 cameraMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, cameraPosition);
@@ -127,11 +171,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//	Calculation::Vector3 ndcVertex = calculation->Transform(kLocalVertices[i], worldViewProjectionMatrix);
 		//	screenVertics[i] = calculation->Transform(ndcVertex, viewportMatrix);
 		//}
-		Calculation::Vector3 project = calculation->Project(calculation->Subtract(point, segment.origin), segment.diff);
+		/*Calculation::Vector3 project = calculation->Project(calculation->Subtract(point, segment.origin), segment.diff);*/
 
-		Calculation::Vector3 closesPoint = calculation->Closestpoint(point, segment);
+		//Calculation::Vector3 closesPoint = calculation->Closestpoint(point, segment);
 
-		Calculation::Matrix4x4 cameraMatrix = calculation->MakeAffineMatrix({ 1.0f,1.0f,1.0f }, cameraRotate, cameraPosition);
+		Calculation::Matrix4x4 worldMateix = calculation->MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+		Calculation::Matrix4x4 cameraMatrix = calculation->MakeAffineMatrix(cameraPosition.scale, cameraPosition.rotate, cameraPosition.translate);
 		Calculation::Matrix4x4 viewMatrix = calculation->Inverse(cameraMatrix);
 		Calculation::Matrix4x4 projectionMatrix = calculation->MakePerspectiveFovMatrix(0.45f, 1280.0f /720.0f, 0.1f, 100.0f);
 		//WVPMatrixの作成
@@ -140,11 +185,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(0, 0, 1280.0f , 720.0f, 0.0f, 1.0f);
 
 		ImGui::Begin("window");
-		/*ImGui::DragFloat3("CameraTranslate", &cameraTranslate.x, 0.01f);*/
-		ImGui::DragFloat3("cameraRotate", &cameraRotate.x, 0.01f);
-		ImGui::DragFloat3("cameraCenter", &sphere.center.x, 0.01f);
-		ImGui::DragFloat("cameraRadius", &sphere.radius, 0.01f);
-		ImGui::InputFloat3("Project", &project.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
+		ImGui::DragFloat3("sphere[0].center", &sphere[0].center.x, 0.01f);
+		ImGui::DragFloat("sphere[0].radius", &sphere[0].radius, 0.01f);
+		ImGui::DragFloat3("sphere[1].center", &sphere[1].center.x, 0.01f);
+		ImGui::DragFloat("sphere[1].radius", &sphere[1].radius, 0.01f);
 		ImGui::End();
 
 		///
@@ -176,25 +220,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		calculation->DrawSphere(sphere, worldViewProjectionMatrix, viewportMatrix, color);*/
 		
-		Calculation::Sphere pointSphere{ point,0.01f };
 
-		Calculation::Sphere closesPointsphere{ closesPoint,0.01f };
 
-		calculation->DrawSphere(pointSphere, ViewProjectionMatrix, viewportMatrix, RED);
+		calculation->DrawSphere(sphere[0], ViewProjectionMatrix, viewportMatrix, sphere[0].color);
+		calculation->DrawSphere(sphere[1], ViewProjectionMatrix, viewportMatrix, sphere[1].color);
 
-		calculation->DrawSphere(closesPointsphere, ViewProjectionMatrix, viewportMatrix, BLACK);
 
 		calculation->DrawGrid(ViewProjectionMatrix, viewportMatrix);
 
 		//DrawSphere(sphere, ViewProjectionMatrix, viewportMatrix, color);
 
-		Calculation::Vector3 start = calculation->Transform(calculation->Transform(segment.origin, ViewProjectionMatrix), viewportMatrix);
+		/*Calculation::Vector3 start = calculation->Transform(calculation->Transform(segment.origin, ViewProjectionMatrix), viewportMatrix);
 
-		Calculation::Vector3 end = calculation->Transform(calculation->Transform(calculation->Add(segment.origin, segment.diff), ViewProjectionMatrix), viewportMatrix);
+		Calculation::Vector3 end = */calculation->Transform(calculation->Transform(calculation->Add(segment.origin, segment.diff), ViewProjectionMatrix), viewportMatrix);
 
-		Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), WHITE);
+		/*Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), WHITE);*/
 
-		ImGui::InputFloat3("Project", &project.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
 		
 		/// ↑描画処理ここまで
 		///

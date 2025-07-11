@@ -569,3 +569,11 @@ Calculation::Vector3 Calculation::Closestpoint(const Vector3& point, const Segme
 	return Add(segment.origin, Multiply(segment.diff,t));
 }
 
+bool Calculation::IsCollision(const Sphere& s1, const Sphere& s2){
+	float distance = Length(Subtract(s1.center, s2.center));
+	if (distance <= s1.radius + s2.radius){
+		return true;
+	}
+	return false;
+}
+

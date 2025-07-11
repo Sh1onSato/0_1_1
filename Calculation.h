@@ -8,6 +8,9 @@ public:
 
 	struct Vector3{
 		float x, y, z;
+		Vector3 operator-(const Vector3& other) const {
+			return Vector3(x - other.x, y - other.y, z - other.z);
+		}
 	};
 
 	struct Matrix4x4 {
@@ -17,10 +20,10 @@ public:
 	struct Sphere {
 		Vector3 center;
 		float radius;
+		int	color;
 	};
 
-	struct Segment
-	{
+	struct Segment{
 		Vector3 origin;
 		Vector3 diff;
 	};
@@ -103,5 +106,7 @@ public:
 	Vector3 Project(const Vector3& v1, const Vector3& v2);
 	
 	Vector3 Closestpoint(const Vector3& point, const Segment& segment);
+
+	bool IsCollision(const Sphere& s1, const Sphere& s2);
 };
 
