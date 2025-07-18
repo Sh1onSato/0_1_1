@@ -569,11 +569,62 @@ Calculation::Vector3 Calculation::Closestpoint(const Vector3& point, const Segme
 	return Add(segment.origin, Multiply(segment.diff,t));
 }
 
-bool Calculation::IsCollision(const Sphere& s1, const Sphere& s2){
-	float distance = Length(Subtract(s1.center, s2.center));
-	if (distance <= s1.radius + s2.radius){
+bool Calculation::IsCollision(const Sphere& sphere, const Plane& plane){
+	float distance = Dot(plane.normal, sphere.center) - plane.distance;
+	if (fabsf(distance) <= sphere.radius)
+	{
 		return true;
 	}
 	return false;
 }
+
+Calculation::Vector3 Calculation::Perpendicular(const Vector3& vector) {
+	if (vector.x != 0.0f || vector.y != 0.0f){
+		return { -vector.y,vector.x,0.0f };
+	}
+	return{ 0.0f,-vector.z,vector.y };
+}
+
+void Calculation::DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color){
+	Calculation::Vector3 center = Multiply(plane.normal, plane.distance);
+
+	Calculation::Vector3 perpendiculars[4];
+
+	// まず、法線に直交する一つのベクトルを生成し、正規化します。
+	// Perpendicular関数が正しく直交ベクトルを返すことが前提です。
+	perpendiculars[0] = Normalize(Perpendicular(plane.normal));
+
+	// そのベクトルと法線の外積を取り、2つ目の直交するベクトルを生成します。
+	// これが平面を構成する基底ベクトルになります。
+	perpendiculars[2] = Normalize(Cross(plane.normal, perpendiculars[0]));
+
+	// これらのベクトルの逆方向も用意します（ただし、直接点計算に使うのは[0]と[2]の組み合わせのみ）
+	perpendiculars[1] = Multiply(perpendiculars[0], -1.0f); // -perpendiculars[0]
+	perpendiculars[3] = Multiply(perpendiculars[2], -1.0f); // -perpendiculars[2]
+
+	// 平面の描画サイズを定義します。これは平面の視覚的な大きさを決めます。
+	const float planeHalfSize = 5.0f; // 例えば、一辺が10の正方形として描画する場合
+
+	Vector3 points[4];
+
+	// 平面の四隅の点を計算します。
+	// centerから、perpendiculars[0]とperpendiculars[2]を±planeHalfSize分だけ伸ばして加算します。
+	points[0] = Add(center, Add(Multiply(perpendiculars[0], -planeHalfSize), Multiply(perpendiculars[2], -planeHalfSize))); // 左下
+	points[1] = Add(center, Add(Multiply(perpendiculars[0], planeHalfSize), Multiply(perpendiculars[2], -planeHalfSize))); // 右下
+	points[2] = Add(center, Add(Multiply(perpendiculars[0], planeHalfSize), Multiply(perpendiculars[2], planeHalfSize))); // 右上
+	points[3] = Add(center, Add(Multiply(perpendiculars[0], -planeHalfSize), Multiply(perpendiculars[2], planeHalfSize))); // 左上
+
+	// ビュープロジェクション行列とビューポート行列で変換します。
+	Vector3 transformedPoints[4];
+	for (int32_t index = 0; index < 4; ++index) {
+		transformedPoints[index] = Transform(Transform(points[index], viewProjectionMatrix), viewportMatrix);
+	}
+
+	// Noviceで線を描画します。点のインデックスを修正し、四角形を形成するようにします。
+	Novice::DrawLine((int)transformedPoints[0].x, (int)transformedPoints[0].y, (int)transformedPoints[1].x, (int)transformedPoints[1].y, color);
+	Novice::DrawLine((int)transformedPoints[1].x, (int)transformedPoints[1].y, (int)transformedPoints[2].x, (int)transformedPoints[2].y, color);
+	Novice::DrawLine((int)transformedPoints[2].x, (int)transformedPoints[2].y, (int)transformedPoints[3].x, (int)transformedPoints[3].y, color);
+	Novice::DrawLine((int)transformedPoints[3].x, (int)transformedPoints[3].y, (int)transformedPoints[0].x, (int)transformedPoints[0].y, color);
+}
+
 

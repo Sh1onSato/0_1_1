@@ -1,5 +1,8 @@
 #include"Calculation.h"
 #include <Novice.h>
+#include <cmath>
+#include <numbers>
+#include <algorithm>
 #include<imgui.h>
 #include <iostream>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -31,6 +34,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Calculation::Vector3 rotate;
 		Calculation::Vector3 translate;
 	};
+
+	Calculation::Plane plane{
+		{0.0f,1.0f,0.0f},
+		1.0f,
+		0xFFFFFFFF,
+	};
+
 
 	/*calculation->m1 =
 	{ 3.2f, 0.7f, 9.6f, 4.4f,
@@ -97,6 +107,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	sphere[1].radius = { 0.4f };
 	sphere[1].color = 0xFFFFFFFF;
 
+
 	Transform  transform{
 	{1.0f,1.0f,1.0f},
 	{0.0f,0.0f,0.0f},
@@ -109,6 +120,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	{ 0.26f,0.0f,0.0f },
 	{ 0.0f,1.9f,-6.25f },
 	};
+
+
+	int mouseX = 0;
+	int mouseY = 0;
+	int preMouseX = 0;
+	int preMouseY = 0;;
+	int mouseWheel = 0;
+	bool isRightMouseDown = false;
+
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -129,24 +149,52 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 		/*Calculation::Matrix4x4 worldMatrix = calculation->MakeAffineMatrix(calculation->scale, calculation->rotate, calculation->translate);*/
 
-		/*if (keys[DIK_W])
+		if (keys[DIK_W])
 		{
-			translate.z += 0.1f;
-		}
-		else if (keys[DIK_S])
-		{
-			translate.z -= 0.1f;
-		}
-		else if (keys[DIK_A])
-		{
-			translate.x -= 0.1f;
-		}
-		else if (keys[DIK_D])
-		{
-			translate.x += 0.1f;
+			cameraPosition.translate.y += 0.01f;
 		}
 
-		rotate.y -= 0.03f;*/
+		if (keys[DIK_S])
+		{
+			cameraPosition.translate.y -= 0.01f;
+		}
+
+		if (keys[DIK_D])
+		{
+			cameraPosition.translate.x += 0.01f;
+		}
+
+		if (keys[DIK_A])
+		{
+			cameraPosition.translate.x -= 0.01f;
+		}
+
+
+
+		/*rotate.y -= 0.03f;*/
+		preMouseX = mouseX;
+		preMouseY = mouseY;
+		mouseWheel = Novice::GetWheel();
+		Novice::GetMousePosition(&mouseX, &mouseY);
+		isRightMouseDown = Novice::IsPressMouse(1);
+
+		const float kRotateSensitivity = 0.001f;
+
+		if (isRightMouseDown)
+		{
+			float dx = float(mouseX - preMouseX);
+			float dy = float(mouseY - preMouseY);
+
+			cameraPosition.rotate.y += dx * kRotateSensitivity;
+	
+			cameraPosition.rotate.x += dy * kRotateSensitivity;
+
+			float limit = std::numbers::pi_v<float> / 2.0f;
+			cameraPosition.rotate.x = std::clamp(cameraPosition.rotate.x, -limit, limit);
+		}
+
+		cameraPosition.translate.z += float(mouseWheel) * kRotateSensitivity;
+
 		Calculation::Vector3 diff_calc_vec = sphere[1].center - sphere[0].center;
 
 		float distance = glm::length(glm::vec3(diff_calc_vec.x, diff_calc_vec.y, diff_calc_vec.z));
@@ -187,9 +235,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("window");
 		ImGui::DragFloat3("sphere[0].center", &sphere[0].center.x, 0.01f);
 		ImGui::DragFloat("sphere[0].radius", &sphere[0].radius, 0.01f);
-		ImGui::DragFloat3("sphere[1].center", &sphere[1].center.x, 0.01f);
-		ImGui::DragFloat("sphere[1].radius", &sphere[1].radius, 0.01f);
+		ImGui::DragFloat3("plane.Normal", &plane.normal.x, 0.01f);
+		plane.normal = calculation->Normalize(plane.normal);
+		ImGui::DragFloat("plane.distance", &plane.distance, 0.01f);
 		ImGui::End();
+
 
 		///
 		/// ↑更新処理ここまで
@@ -223,7 +273,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 		calculation->DrawSphere(sphere[0], ViewProjectionMatrix, viewportMatrix, sphere[0].color);
-		calculation->DrawSphere(sphere[1], ViewProjectionMatrix, viewportMatrix, sphere[1].color);
+		calculation->DrawPlane(plane, ViewProjectionMatrix, viewportMatrix, plane.color);
 
 
 		calculation->DrawGrid(ViewProjectionMatrix, viewportMatrix);
@@ -232,7 +282,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		/*Calculation::Vector3 start = calculation->Transform(calculation->Transform(segment.origin, ViewProjectionMatrix), viewportMatrix);
 
-		Calculation::Vector3 end = */calculation->Transform(calculation->Transform(calculation->Add(segment.origin, segment.diff), ViewProjectionMatrix), viewportMatrix);
+		Calculation::Vector3 end =calculation->Transform(calculation->Transform(calculation->Add(segment.origin, segment.diff), ViewProjectionMatrix), viewportMatrix);
 
 		/*Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), WHITE);*/
 

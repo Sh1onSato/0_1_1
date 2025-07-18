@@ -28,6 +28,12 @@ public:
 		Vector3 diff;
 	};
 
+	struct Plane {
+		Vector3 normal;
+		float distance;
+		uint32_t color;
+	};
+
 	Vector3 translate = {};
 	Vector3 scale = {};
 	Vector3 rotate = {};
@@ -107,6 +113,10 @@ public:
 	
 	Vector3 Closestpoint(const Vector3& point, const Segment& segment);
 
-	bool IsCollision(const Sphere& s1, const Sphere& s2);
+	bool IsCollision(const Sphere& sphere, const Plane& plane);
+
+	Vector3 Perpendicular(const Vector3& vector);
+
+	void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 };
 
