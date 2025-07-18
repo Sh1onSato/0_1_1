@@ -468,7 +468,6 @@ Calculation::Vector3 Calculation::Cross(const Vector3& a, const Vector3& b){
 	result.z = a.x * b.y - a.y * b.x;
 
 	return result;
-	
 }
 
 void Calculation::DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) {
@@ -547,18 +546,18 @@ void Calculation::DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x
 Calculation::Vector3 Calculation::Project(const Vector3& v1, const Vector3& v2){
 	float v2LenSq = Dot(v2, v2);
 
-	if (v2LenSq == 0.0f){
+	if (v2LenSq == 0.0f) {
 		return { 0, 0, 0 };
 	};
 
 	float t = Dot(v1, v2) / v2LenSq;
-	return Multiply(v2,t);
+	return Multiply(v2, t);
 }
 
 Calculation::Vector3 Calculation::Closestpoint(const Vector3& point, const Segment& segment){
 	Vector3 toPoint = Subtract(point, segment.origin);
 	float segLenSq = Dot(segment.diff, segment.diff);
-	if (segLenSq == 0.0f){
+	if (segLenSq == 0.0f) {
 		return segment.origin;
 	}
 	float t = Dot(toPoint, segment.diff) / segLenSq;
@@ -566,21 +565,21 @@ Calculation::Vector3 Calculation::Closestpoint(const Vector3& point, const Segme
 	if (t < 0.0f) t = 0.0f;
 	if (t > 1.0f) t = 1.0f;
 
-	return Add(segment.origin, Multiply(segment.diff,t));
+	return Add(segment.origin, Multiply(segment.diff, t));
 }
 
-bool Calculation::IsCollision(const Sphere& sphere, const Plane& plane){
-	float distance = Dot(plane.normal, sphere.center) - plane.distance;
-	if (fabsf(distance) <= sphere.radius)
-	{
+bool Calculation::IsCollision(const Segment& segment, const Plane& plane) {
+	float d0 = Dot(plane.normal, segment.origin) + plane.distance; // N.P + D = 0 の形式に合わせて修正
+	float d1 = Dot(plane.normal, Add(segment.origin, segment.diff)) + plane.distance; // Add の引数を修正
+
+	if (d0 * d1 <= 0.0f) {
 		return true;
 	}
 	return false;
 }
-
 Calculation::Vector3 Calculation::Perpendicular(const Vector3& vector) {
-	if (vector.x != 0.0f || vector.y != 0.0f){
-		return { -vector.y,vector.x,0.0f };
+	if (std::abs(vector.x) > 1e-6f || std::abs(vector.y) > 1e-6f) { // Z軸と揃っていない場合
+		return { -vector.y, vector.x, 0.0f };
 	}
 	return{ 0.0f,-vector.z,vector.y };
 }
@@ -627,4 +626,38 @@ void Calculation::DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionM
 	Novice::DrawLine((int)transformedPoints[3].x, (int)transformedPoints[3].y, (int)transformedPoints[0].x, (int)transformedPoints[0].y, color);
 }
 
+Calculation::PlaneSegmentCollisionInfo Calculation::GetPlaneSegmentCollision(const Segment& segment, const Plane& plane) {
+	PlaneSegmentCollisionInfo info;
+	info.hit = false;
+	info.t = -1.0f;
+	info.hitPoint = { 0.0f, 0.0f, 0.0f };
+
+	Vector3 A = segment.origin;
+	Vector3 v = segment.diff; // これは (B - A) です
+
+	// 平面の法線 N と距離 D (N.P + D = 0 を仮定)
+	Vector3 N = plane.normal;
+	float D = plane.distance;
+
+	// 法線と線分方向の内積 N_dot_v を計算
+	float N_dot_v = Dot(N, v);
+
+	if (std::abs(N_dot_v) < 1e-6f) {
+		float N_dot_A_plus_D = Dot(N, A) + D;
+		if (std::abs(N_dot_A_plus_D) < 1e-6f) {
+			info.hit = true; info.hitPoint = segment.origin;
+			info.t = 0.0f;
+		}
+		return info; 
+	}
+	float t = -(Dot(N, A) + D) / N_dot_v;
+
+	if (t >= 0.0f && t <= 1.0f) {
+		info.hit = true;
+		info.t = t;
+		info.hitPoint = Add(A, Multiply(v, t)); // P = A + t*v
+	}
+
+	return info;
+}
 

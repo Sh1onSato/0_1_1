@@ -26,12 +26,18 @@ public:
 	struct Segment{
 		Vector3 origin;
 		Vector3 diff;
+		uint32_t color;
 	};
 
 	struct Plane {
 		Vector3 normal;
 		float distance;
 		uint32_t color;
+	};
+	struct PlaneSegmentCollisionInfo {
+		bool hit;          
+		Vector3 hitPoint;   
+		float t;
 	};
 
 	Vector3 translate = {};
@@ -113,10 +119,13 @@ public:
 	
 	Vector3 Closestpoint(const Vector3& point, const Segment& segment);
 
-	bool IsCollision(const Sphere& sphere, const Plane& plane);
+	bool IsCollision(const Segment& segment, const Plane& plane);
 
 	Vector3 Perpendicular(const Vector3& vector);
 
 	void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
+
+	PlaneSegmentCollisionInfo GetPlaneSegmentCollision(const Segment& segment, const Plane& plane);
+
 };
 

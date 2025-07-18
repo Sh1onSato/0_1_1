@@ -26,7 +26,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Calculation::Segment segment{
 		{-2.0f,-1.0f, 0.0f},
-		{ 3.0f, 2.0f, 2.0f}
+		{ 3.0f, 2.0f, 2.0f},
+		0xFFFFFFFF,
 	};
 
 	struct Transform {
@@ -197,17 +198,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		Calculation::Vector3 diff_calc_vec = sphere[1].center - sphere[0].center;
 
-		float distance = glm::length(glm::vec3(diff_calc_vec.x, diff_calc_vec.y, diff_calc_vec.z));
+		/*float distance = glm::length(glm::vec3(diff_calc_vec.x, diff_calc_vec.y, diff_calc_vec.z));*/
 
-		if(distance < sphere[0].radius + sphere[1].radius) {
-			// 衝突している場合の処理
-			sphere[0].color = 0xFFFF00FF; // 赤色に変更
+		//if(distance < sphere[0].radius + sphere[1].radius) {
+		//	// 衝突している場合の処理
+		//	sphere[0].color = 0xFFFF00FF; // 赤色に変更
+		//}
+		//else {
+		//	// 衝突していない場合の処理
+		//	sphere[0].color = 0xFFFFFFFF; // 元の色に戻す
+		//}
+		Calculation::PlaneSegmentCollisionInfo collisionResult = calculation->GetPlaneSegmentCollision(segment, plane);
+
+		if (collisionResult.hit) {
+			// 衝突検出！ 線分の色を変更してヒットを示す
+			segment.color = 0xFF0000FF; // 衝突時は赤色
 		}
 		else {
-			// 衝突していない場合の処理
-			sphere[0].color = 0xFFFFFFFF; // 元の色に戻す
+			// 衝突なし、デフォルトの色に戻す
+			segment.color = 0xFFFFFFFF; // 白
 		}
-
 		//Calculation::Matrix4x4 worldMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, cameraRotate, cameraTranslate);
 		//Calculation::Matrix4x4 cameraMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, cameraPosition);
 		//Calculation::Matrix4x4 viewMatrix = calculation->Inverse(cameraMatrix);
@@ -233,11 +243,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(0, 0, 1280.0f , 720.0f, 0.0f, 1.0f);
 
 		ImGui::Begin("window");
-		ImGui::DragFloat3("sphere[0].center", &sphere[0].center.x, 0.01f);
-		ImGui::DragFloat("sphere[0].radius", &sphere[0].radius, 0.01f);
+		ImGui::DragFloat3("segment.origin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat3("segment.diff", &segment.diff.x, 0.01f);
 		ImGui::DragFloat3("plane.Normal", &plane.normal.x, 0.01f);
 		plane.normal = calculation->Normalize(plane.normal);
 		ImGui::DragFloat("plane.distance", &plane.distance, 0.01f);
+		ImGui::Text("Plane-Segment Collision: %s", collisionResult.hit ? "HIT!" : "NO HIT");
+		if (collisionResult.hit) {
+			ImGui::Text("Hit Point: (%.2f, %.2f, %.2f)", collisionResult.hitPoint.x, collisionResult.hitPoint.y, collisionResult.hitPoint.z);
+			ImGui::Text("t Value: %.2f", collisionResult.t);
+		}
 		ImGui::End();
 
 
@@ -272,7 +287,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 
 
-		calculation->DrawSphere(sphere[0], ViewProjectionMatrix, viewportMatrix, sphere[0].color);
+		/*calculation->DrawSphere(sphere[0], ViewProjectionMatrix, viewportMatrix, sphere[0].color);*/
 		calculation->DrawPlane(plane, ViewProjectionMatrix, viewportMatrix, plane.color);
 
 
@@ -280,11 +295,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//DrawSphere(sphere, ViewProjectionMatrix, viewportMatrix, color);
 
-		/*Calculation::Vector3 start = calculation->Transform(calculation->Transform(segment.origin, ViewProjectionMatrix), viewportMatrix);
+		Calculation::Vector3 start = calculation->Transform(calculation->Transform(segment.origin, ViewProjectionMatrix), viewportMatrix);
 
 		Calculation::Vector3 end =calculation->Transform(calculation->Transform(calculation->Add(segment.origin, segment.diff), ViewProjectionMatrix), viewportMatrix);
 
-		/*Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), WHITE);*/
+		Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), segment.color);
 
 		
 		/// ↑描画処理ここまで
