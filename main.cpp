@@ -133,6 +133,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	{ 0.0f,1.9f,-6.25f },
 	};
 
+	Calculation::AABB aabb1{
+		.min{-0.5f,-0.5f,-0.5f},
+		.max{ 0.0f, 0.0f, 0.0f},
+	};
+
+	aabb1.color = 0xFFFFFFFF;
+
+	Calculation::AABB aabb2{
+		.min{ 0.2f, 0.2f, 0.2f},
+		.max{ 1.0f, 1.0f, 1.0f},
+	};
+
+	aabb2.color = 0xFFFFFFFF;
 
 
 	int mouseX = 0;
@@ -230,13 +243,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//	// 衝突なし、デフォルトの色に戻す
 		//	segment.color = 0xFFFFFFFF; // 白
 		//}
-		if (calculation->IsCollision(triangle, segment))
-		{
-			segment.color = 0xFF0000FF;
+		if (calculation->IsCollision(aabb1, aabb2)){
+			aabb1.color = 0xFF0000FF;
 		}
-		else
-		{
-			segment.color = 0xFFFFFFFF;
+		else{
+			aabb1.color = 0xFFFFFFFF;
 		}
 		//Calculation::Matrix4x4 worldMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, cameraRotate, cameraTranslate);
 		//Calculation::Matrix4x4 cameraMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, cameraPosition);
@@ -263,11 +274,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(0, 0, 1280.0f , 720.0f, 0.0f, 1.0f);
 
 		ImGui::Begin("window");
-		ImGui::DragFloat3("segment.origin", &segment.origin.x, 0.01f);
-		ImGui::DragFloat3("segment.diff", &segment.diff.x, 0.01f);
-		ImGui::DragFloat3("Triangle.v0", &triangle.vertices[0].x, 0.01f);
-		ImGui::DragFloat3("Triangle.v1", &triangle.vertices[1].x, 0.01f);
-		ImGui::DragFloat3("Triangle.v2", &triangle.vertices[2].x, 0.01f);
+		ImGui::DragFloat3("aabb1.min", &aabb1.min.x, 0.01f);
+		ImGui::DragFloat3("aabb1.max", &aabb1.max.x, 0.01f);
+		ImGui::DragFloat3("aabb2.min", &aabb2.min.x, 0.01f);
+		ImGui::DragFloat3("aabb2.max", &aabb2.max.x, 0.01f);
 		ImGui::End();
 
 
@@ -310,14 +320,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//DrawSphere(sphere, ViewProjectionMatrix, viewportMatrix, color);
 
-		Calculation::Vector3 start = calculation->Transform(calculation->Transform(segment.origin, ViewProjectionMatrix), viewportMatrix);
+		/*Calculation::Vector3 start = calculation->Transform(calculation->Transform(segment.origin, ViewProjectionMatrix), viewportMatrix);*/
 
-		Calculation::Vector3 end =calculation->Transform(calculation->Transform(calculation->Add(segment.origin, segment.diff), ViewProjectionMatrix), viewportMatrix);
+		/*Calculation::Vector3 end =calculation->Transform(calculation->Transform(calculation->Add(segment.origin, segment.diff), ViewProjectionMatrix), viewportMatrix);*/
 
-		Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), segment.color);
+		//Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), segment.color);
 
-		calculation->DrawTriangle(triangle, ViewProjectionMatrix, viewportMatrix, triangle.color);
-		
+		/*calculation->DrawTriangle(triangle, ViewProjectionMatrix, viewportMatrix, triangle.color);*/
+
+		calculation->DrawAABB(aabb1, ViewProjectionMatrix, viewportMatrix, aabb1.color);
+		calculation->DrawAABB(aabb2, ViewProjectionMatrix, viewportMatrix, aabb2.color);
 		/// ↑描画処理ここまで
 		///
 

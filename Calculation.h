@@ -45,6 +45,12 @@ public:
 		uint32_t color;
 	};
 
+	struct AABB{
+		Vector3 min;
+		Vector3 max;
+		uint32_t color;
+	};
+
 	Vector3 translate = {};
 	Vector3 scale = {};
 	Vector3 rotate = {};
@@ -124,7 +130,7 @@ public:
 	
 	Vector3 Closestpoint(const Vector3& point, const Segment& segment);
 
-	bool IsCollision(const Triangle& triangle, const Segment& segment);
+	bool IsCollision(const AABB& aabb1, const AABB& aabb2);
 
 	Vector3 Perpendicular(const Vector3& vector);
 
@@ -133,5 +139,7 @@ public:
 	PlaneSegmentCollisionInfo GetPlaneSegmentCollision(const Segment& segment, const Plane& plane);
 
 	void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
+
+	void DrawAABB(const AABB& aabb, Matrix4x4& viewProjectionMatrix, Matrix4x4& viewportMatrix, uint32_t color);
 };
 

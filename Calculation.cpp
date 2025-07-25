@@ -568,41 +568,14 @@ Calculation::Vector3 Calculation::Closestpoint(const Vector3& point, const Segme
 	return Add(segment.origin, Multiply(segment.diff, t));
 }
 
-bool Calculation::IsCollision(const Triangle& triangle, const Segment& segment){
-	Vector3 v0 = triangle.vertices[0];
-	Vector3 v1 = triangle.vertices[1];
-	Vector3 v2 = triangle.vertices[2];
-
-	Vector3 p0 = segment.origin;
-	Vector3 p1 = Add(segment.origin, segment.diff);
-
-	// 線分と平面の衝突判定  
-	Plane plane;
-	plane.normal = Normalize(Cross(Subtract(v1, v0), Subtract(v2, v0)));
-	plane.distance = Dot(plane.normal, v0);
-
-	float dot = Dot(plane.normal, segment.diff);
-	float distanceOriginToPlane = Dot(segment.origin, plane.normal) - plane.distance;
-	float t = -distanceOriginToPlane / dot;
-	Vector3 collisionPoint = Add(segment.origin, Multiply(segment.diff, t));
-
-	Vector3 v01 = Subtract(v1, v0);
-	Vector3 v12 = Subtract(v2, v1);
-	Vector3 v20 = Subtract(v0, v2);
-
-	Vector3 v0p = Subtract(collisionPoint, v0);
-	Vector3 v1p = Subtract(collisionPoint, v1);
-	Vector3 v2p = Subtract(collisionPoint, v2);
-
-	Vector3 cross01 = Cross(v01, v0p);
-	Vector3 cross12 = Cross(v12, v1p);
-	Vector3 cross20 = Cross(v20, v2p);
-
-	if (Dot(cross01, cross12) >= 0.0f &&Dot(cross12, cross20) >= 0.0f){
+bool Calculation::IsCollision(const AABB& aabb1, const AABB& aabb2){
+	if ((aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x) &&
+		(aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) &&
+		(aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z))
+	{
 		return true;
 	}
 	return false;
-
 }
 
 Calculation::Vector3 Calculation::Perpendicular(const Vector3& vector) {
@@ -704,5 +677,37 @@ void Calculation::DrawTriangle(const Triangle& triangle, const Matrix4x4& viewPr
 	Novice::DrawLine(static_cast<int>(screenVertices[1].x), static_cast<int>(screenVertices[1].y),static_cast<int>(screenVertices[2].x), static_cast<int>(screenVertices[2].y),color);
 	
 	Novice::DrawLine(static_cast<int>(screenVertices[2].x), static_cast<int>(screenVertices[2].y),static_cast<int>(screenVertices[0].x), static_cast<int>(screenVertices[0].y),color);
+}
+
+void Calculation::DrawAABB(const AABB& aabb, Matrix4x4& viewProjectionMatrix, Matrix4x4& viewportMatrix, uint32_t color){
+	Vector3 vertices[8];
+
+	vertices[0] = { aabb.min.x, aabb.min.y, aabb.min.z };
+	vertices[1] = { aabb.max.x, aabb.min.y, aabb.min.z };
+	vertices[2] = { aabb.max.x, aabb.max.y, aabb.min.z };
+	vertices[3] = { aabb.min.x, aabb.max.y, aabb.min.z };
+	vertices[4] = { aabb.min.x, aabb.min.y, aabb.max.z };
+	vertices[5] = { aabb.max.x, aabb.min.y, aabb.max.z };
+	vertices[6] = { aabb.max.x, aabb.max.y, aabb.max.z };
+	vertices[7] = { aabb.min.x, aabb.max.y, aabb.max.z };
+
+	for (int i = 0; i < 8; ++i){		
+		vertices[i] = Transform(vertices[i], viewProjectionMatrix);
+
+		vertices[i] = Transform(vertices[i], viewportMatrix);
+	}
+
+	int edges[12][2] = {
+		{0, 1}, {1, 2}, {2, 3}, {3, 0}, 
+		{4, 5}, {5, 6}, {6, 7}, {7, 4}, 
+		{0, 4}, {1, 5}, {2, 6}, {3, 7}  
+	};
+
+	for (int i = 0; i < 12; ++i){
+		Novice::DrawLine(static_cast<int>(vertices[edges[i][0]].x), static_cast<int>(vertices[edges[i][0]].y),
+			static_cast<int>(vertices[edges[i][1]].x), static_cast<int>(vertices[edges[i][1]].y),
+			color);
+	}
+
 }
 
