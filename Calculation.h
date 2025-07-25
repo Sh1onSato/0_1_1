@@ -40,6 +40,11 @@ public:
 		float t;
 	};
 
+	struct Triangle {
+		Calculation::Vector3 vertices[3];
+		uint32_t color;
+	};
+
 	Vector3 translate = {};
 	Vector3 scale = {};
 	Vector3 rotate = {};
@@ -119,7 +124,7 @@ public:
 	
 	Vector3 Closestpoint(const Vector3& point, const Segment& segment);
 
-	bool IsCollision(const Segment& segment, const Plane& plane);
+	bool IsCollision(const Triangle& triangle, const Segment& segment);
 
 	Vector3 Perpendicular(const Vector3& vector);
 
@@ -127,5 +132,6 @@ public:
 
 	PlaneSegmentCollisionInfo GetPlaneSegmentCollision(const Segment& segment, const Plane& plane);
 
+	void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 };
 

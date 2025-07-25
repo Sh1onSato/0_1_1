@@ -568,15 +568,43 @@ Calculation::Vector3 Calculation::Closestpoint(const Vector3& point, const Segme
 	return Add(segment.origin, Multiply(segment.diff, t));
 }
 
-bool Calculation::IsCollision(const Segment& segment, const Plane& plane) {
-	float d0 = Dot(plane.normal, segment.origin) + plane.distance; // N.P + D = 0 の形式に合わせて修正
-	float d1 = Dot(plane.normal, Add(segment.origin, segment.diff)) + plane.distance; // Add の引数を修正
+bool Calculation::IsCollision(const Triangle& triangle, const Segment& segment){
+	Vector3 v0 = triangle.vertices[0];
+	Vector3 v1 = triangle.vertices[1];
+	Vector3 v2 = triangle.vertices[2];
 
-	if (d0 * d1 <= 0.0f) {
+	Vector3 p0 = segment.origin;
+	Vector3 p1 = Add(segment.origin, segment.diff);
+
+	// 線分と平面の衝突判定  
+	Plane plane;
+	plane.normal = Normalize(Cross(Subtract(v1, v0), Subtract(v2, v0)));
+	plane.distance = Dot(plane.normal, v0);
+
+	float dot = Dot(plane.normal, segment.diff);
+	float distanceOriginToPlane = Dot(segment.origin, plane.normal) - plane.distance;
+	float t = -distanceOriginToPlane / dot;
+	Vector3 collisionPoint = Add(segment.origin, Multiply(segment.diff, t));
+
+	Vector3 v01 = Subtract(v1, v0);
+	Vector3 v12 = Subtract(v2, v1);
+	Vector3 v20 = Subtract(v0, v2);
+
+	Vector3 v0p = Subtract(collisionPoint, v0);
+	Vector3 v1p = Subtract(collisionPoint, v1);
+	Vector3 v2p = Subtract(collisionPoint, v2);
+
+	Vector3 cross01 = Cross(v01, v0p);
+	Vector3 cross12 = Cross(v12, v1p);
+	Vector3 cross20 = Cross(v20, v2p);
+
+	if (Dot(cross01, cross12) >= 0.0f &&Dot(cross12, cross20) >= 0.0f){
 		return true;
 	}
 	return false;
+
 }
+
 Calculation::Vector3 Calculation::Perpendicular(const Vector3& vector) {
 	if (std::abs(vector.x) > 1e-6f || std::abs(vector.y) > 1e-6f) { // Z軸と揃っていない場合
 		return { -vector.y, vector.x, 0.0f };
@@ -659,5 +687,22 @@ Calculation::PlaneSegmentCollisionInfo Calculation::GetPlaneSegmentCollision(con
 	}
 
 	return info;
+}
+
+void Calculation::DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color){
+	Vector3 screenVertices[3];
+
+	for (int i = 0; i < 3; ++i){
+		Vector3 projected = Transform(triangle.vertices[i], viewProjectionMatrix);
+
+		screenVertices[i] = Transform(projected, viewportMatrix);
+	}
+
+	// 三辺を描画
+	Novice::DrawLine(static_cast<int>(screenVertices[0].x), static_cast<int>(screenVertices[0].y),static_cast<int>(screenVertices[1].x), static_cast<int>(screenVertices[1].y),color);
+	
+	Novice::DrawLine(static_cast<int>(screenVertices[1].x), static_cast<int>(screenVertices[1].y),static_cast<int>(screenVertices[2].x), static_cast<int>(screenVertices[2].y),color);
+	
+	Novice::DrawLine(static_cast<int>(screenVertices[2].x), static_cast<int>(screenVertices[2].y),static_cast<int>(screenVertices[0].x), static_cast<int>(screenVertices[0].y),color);
 }
 
