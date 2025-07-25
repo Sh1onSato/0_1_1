@@ -9,6 +9,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtx/norm.hpp"
 
+
 const char kWindowTitle[] = "LE2C_12_サトウ_シオン";
 
 
@@ -102,7 +103,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	/*Calculation::Sphere sphere= {0.0f,0.0f ,- 1.0f,1.0f};*/
 
 	Calculation::Sphere sphere[2];
-	sphere[0].center = { 0.0f,0.0f ,0.6f };
+	sphere[0].center = { 1.0f,1.0f ,1.0f };
 	sphere[0].radius = { 1.0f };
 	sphere[0].color = 0xFFFFFFFF;
 	sphere[1].center = { 1.7f,0.0f ,1.0f };
@@ -243,7 +244,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//	// 衝突なし、デフォルトの色に戻す
 		//	segment.color = 0xFFFFFFFF; // 白
 		//}
-		if (calculation->IsCollision(aabb1, aabb2)){
+		if (calculation->IsCollision(aabb1, sphere[0])){
 			aabb1.color = 0xFF0000FF;
 		}
 		else{
@@ -276,8 +277,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("window");
 		ImGui::DragFloat3("aabb1.min", &aabb1.min.x, 0.01f);
 		ImGui::DragFloat3("aabb1.max", &aabb1.max.x, 0.01f);
-		ImGui::DragFloat3("aabb2.min", &aabb2.min.x, 0.01f);
-		ImGui::DragFloat3("aabb2.max", &aabb2.max.x, 0.01f);
+		ImGui::DragFloat3("sphere[0].center", &sphere[0].center.x, 0.01f);
+		ImGui::DragFloat("sphere[0].radius", &sphere[0].radius, 0.01f);
 		ImGui::End();
 
 
@@ -318,7 +319,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		calculation->DrawGrid(ViewProjectionMatrix, viewportMatrix);
 
-		//DrawSphere(sphere, ViewProjectionMatrix, viewportMatrix, color);
+		calculation->DrawSphere(sphere[0], ViewProjectionMatrix, viewportMatrix, sphere[0].color);
+
 
 		/*Calculation::Vector3 start = calculation->Transform(calculation->Transform(segment.origin, ViewProjectionMatrix), viewportMatrix);*/
 
@@ -329,7 +331,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/*calculation->DrawTriangle(triangle, ViewProjectionMatrix, viewportMatrix, triangle.color);*/
 
 		calculation->DrawAABB(aabb1, ViewProjectionMatrix, viewportMatrix, aabb1.color);
-		calculation->DrawAABB(aabb2, ViewProjectionMatrix, viewportMatrix, aabb2.color);
+		//calculation->DrawAABB(aabb2, ViewProjectionMatrix, viewportMatrix, aabb2.color);
 		/// ↑描画処理ここまで
 		///
 

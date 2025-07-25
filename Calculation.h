@@ -130,7 +130,7 @@ public:
 	
 	Vector3 Closestpoint(const Vector3& point, const Segment& segment);
 
-	bool IsCollision(const AABB& aabb1, const AABB& aabb2);
+	bool IsCollision(const AABB& aabb, const Sphere& sphere);
 
 	Vector3 Perpendicular(const Vector3& vector);
 

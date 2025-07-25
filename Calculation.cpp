@@ -1,6 +1,7 @@
 ﻿#include "Calculation.h"
 #include <cmath> 
 #include <numbers> 
+#include<algorithm>
 
 Calculation::Vector3 Calculation::Add(const Vector3& a, const Vector3& b){
 	return { a.x + b.x, a.y + b.y, a.z + b.z };
@@ -568,13 +569,22 @@ Calculation::Vector3 Calculation::Closestpoint(const Vector3& point, const Segme
 	return Add(segment.origin, Multiply(segment.diff, t));
 }
 
-bool Calculation::IsCollision(const AABB& aabb1, const AABB& aabb2){
-	if ((aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x) &&
-		(aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) &&
-		(aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z))
+bool Calculation::IsCollision(const AABB& aabb, const Sphere& sphere){
+	Vector3 closestPoint{};
+	closestPoint.x = std::clamp(sphere.center.x, aabb.min.x, aabb.max.x);
+	closestPoint.y = std::clamp(sphere.center.y, aabb.min.y, aabb.max.y);
+	closestPoint.z = std::clamp(sphere.center.z, aabb.min.z, aabb.max.z);
+
+	// 最近接点と球の中心との距離を求める
+	float distance = Length(Subtract(closestPoint, sphere.center));
+
+
+	if (distance <= sphere.radius)
 	{
+		//衝突している
 		return true;
 	}
+
 	return false;
 }
 
