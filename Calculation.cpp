@@ -569,23 +569,41 @@ Calculation::Vector3 Calculation::Closestpoint(const Vector3& point, const Segme
 	return Add(segment.origin, Multiply(segment.diff, t));
 }
 
-bool Calculation::IsCollision(const AABB& aabb, const Sphere& sphere){
-	Vector3 closestPoint{};
-	closestPoint.x = std::clamp(sphere.center.x, aabb.min.x, aabb.max.x);
-	closestPoint.y = std::clamp(sphere.center.y, aabb.min.y, aabb.max.y);
-	closestPoint.z = std::clamp(sphere.center.z, aabb.min.z, aabb.max.z);
+bool Calculation::IsCollision(const AABB& aabb, const Segment& segment){
+	Vector3 o = segment.origin;
+	Vector3 b = segment.diff;
 
-	// 最近接点と球の中心との距離を求める
-	float distance = Length(Subtract(closestPoint, sphere.center));
+	float tmin = 0.0f;
+	float tmax = 1.0f;
+	const float EPS = 1e-6f;
 
+	for (int i = 0; i < 3; ++i){
+		float origin = (&o.x)[i];  
+		float dir = (&b.x)[i];     
+		float slabMin = (&aabb.min.x)[i];
+		float slabMax = (&aabb.max.x)[i];
 
-	if (distance <= sphere.radius)
-	{
-		//衝突している
-		return true;
+		if (fabs(dir) < EPS){
+			if (origin < slabMin || origin > slabMax)
+			{
+				return false;
+			}
+		}
+		else{
+			float t1 = (slabMin - origin) / dir;
+			float t2 = (slabMax - origin) / dir;
+			if (t1 > t2) std::swap(t1, t2);
+
+			tmin = max(tmin, t1);
+			tmax = min(tmax, t2);
+
+			if (tmin > tmax){
+				return false;
+			}
+		}
 	}
 
-	return false;
+	return true;
 }
 
 Calculation::Vector3 Calculation::Perpendicular(const Vector3& vector) {

@@ -26,8 +26,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Calculation* calculation = new Calculation();
 
 	Calculation::Segment segment{
-		{0.0f,0.5f, -1.0f},
-		{ 0.0f, 0.5f, 2.0f},
+		{-0.7f,0.3f, 0.0f},
+		{ 2.0f, -0.5f, 0.0f},
 		0xFFFFFFFF,
 	};
 
@@ -136,17 +136,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Calculation::AABB aabb1{
 		.min{-0.5f,-0.5f,-0.5f},
-		.max{ 0.0f, 0.0f, 0.0f},
+		.max{ 0.5f, 0.5f, 0.5f},
 	};
 
 	aabb1.color = 0xFFFFFFFF;
 
-	Calculation::AABB aabb2{
-		.min{ 0.2f, 0.2f, 0.2f},
-		.max{ 1.0f, 1.0f, 1.0f},
-	};
+	//Calculation::AABB aabb2{
+	//	.min{ 0.2f, 0.2f, 0.2f},
+	//	.max{ 1.0f, 1.0f, 1.0f},
+	//};
 
-	aabb2.color = 0xFFFFFFFF;
+	//aabb2.color = 0xFFFFFFFF;
 
 
 	int mouseX = 0;
@@ -244,7 +244,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//	// 衝突なし、デフォルトの色に戻す
 		//	segment.color = 0xFFFFFFFF; // 白
 		//}
-		if (calculation->IsCollision(aabb1, sphere[0])){
+		if (calculation->IsCollision(aabb1, segment)){
 			aabb1.color = 0xFF0000FF;
 		}
 		else{
@@ -277,8 +277,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("window");
 		ImGui::DragFloat3("aabb1.min", &aabb1.min.x, 0.01f);
 		ImGui::DragFloat3("aabb1.max", &aabb1.max.x, 0.01f);
-		ImGui::DragFloat3("sphere[0].center", &sphere[0].center.x, 0.01f);
-		ImGui::DragFloat("sphere[0].radius", &sphere[0].radius, 0.01f);
+		ImGui::DragFloat3("segment.origin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat3("segment.diff", &segment.diff.x, 0.01f);
 		ImGui::End();
 
 
@@ -319,12 +319,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		calculation->DrawGrid(ViewProjectionMatrix, viewportMatrix);
 
-		calculation->DrawSphere(sphere[0], ViewProjectionMatrix, viewportMatrix, sphere[0].color);
+		/*calculation->DrawSphere(sphere[0], ViewProjectionMatrix, viewportMatrix, sphere[0].color);*/
 
 
-		/*Calculation::Vector3 start = calculation->Transform(calculation->Transform(segment.origin, ViewProjectionMatrix), viewportMatrix);*/
+		Calculation::Vector3 start = calculation->Transform(calculation->Transform(segment.origin, ViewProjectionMatrix), viewportMatrix);
 
-		/*Calculation::Vector3 end =calculation->Transform(calculation->Transform(calculation->Add(segment.origin, segment.diff), ViewProjectionMatrix), viewportMatrix);*/
+		Calculation::Vector3 end =calculation->Transform(calculation->Transform(calculation->Add(segment.origin, segment.diff), ViewProjectionMatrix), viewportMatrix);
 
 		//Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), segment.color);
 
@@ -332,6 +332,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		calculation->DrawAABB(aabb1, ViewProjectionMatrix, viewportMatrix, aabb1.color);
 		//calculation->DrawAABB(aabb2, ViewProjectionMatrix, viewportMatrix, aabb2.color);
+
+		Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), segment.color);
+
 		/// ↑描画処理ここまで
 		///
 
