@@ -51,6 +51,8 @@ public:
 		uint32_t color;
 	};
 
+
+
 	Vector3 translate = {};
 	Vector3 scale = {};
 	Vector3 rotate = {};
@@ -141,5 +143,11 @@ public:
 	void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 
 	void DrawAABB(const AABB& aabb, Matrix4x4& viewProjectionMatrix, Matrix4x4& viewportMatrix, uint32_t color);
+
+	Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t);
+
+	void DrawBezier(const Vector3& controlPoint0, const Vector3& controlPoint1, const Vector3& controlPoint2, Matrix4x4& viewProjectionMatrix, Matrix4x4& viewportMatrix, uint32_t color);
+
 };
+
 

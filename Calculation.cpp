@@ -739,3 +739,45 @@ void Calculation::DrawAABB(const AABB& aabb, Matrix4x4& viewProjectionMatrix, Ma
 
 }
 
+Calculation::Vector3 Calculation::Lerp(const Vector3& v1, const Vector3& v2, float t){
+	return {
+			v1.x + (v2.x - v1.x) * t,
+			v1.y + (v2.y - v1.y) * t,
+			v1.z + (v2.z - v1.z) * t
+	};
+}
+
+void Calculation::DrawBezier(const Vector3& controlPoint0, const Vector3& controlPoint1, const Vector3& controlPoint2, Matrix4x4& viewProjectionMatrix, Matrix4x4& viewportMatrix, uint32_t color){
+	const int kNumSamples = 100;
+	Vector3 prev{};
+	Vector3 points[3] = { controlPoint0, controlPoint1, controlPoint2 };
+
+	//ベジェ曲線
+	for (int i = 0; i <= kNumSamples; ++i){
+		float t = static_cast<float>(i) / kNumSamples;
+		Vector3 p0 = Lerp(controlPoint0, controlPoint1, t);
+		Vector3 p1 = Lerp(controlPoint1, controlPoint2, t);
+		Vector3 bezierPoint = Lerp(p0, p1, t);
+
+		Vector3 projected = Transform(bezierPoint, viewProjectionMatrix);
+
+		Vector3 screen = Transform(projected, viewportMatrix);
+
+		if (i > 0){
+			Novice::DrawLine(static_cast<int>(prev.x), static_cast<int>(prev.y),
+				static_cast<int>(screen.x), static_cast<int>(screen.y), color);
+		}
+		prev = screen;
+	}
+
+	for (int i = 0; i < 3; ++i){
+		Calculation::Vector3 ndc = Transform(points[i], viewProjectionMatrix);
+
+		Calculation::Vector3 screen = Transform(ndc, viewportMatrix);
+
+		Novice::DrawEllipse(static_cast<int>(screen.x), static_cast<int>(screen.y),
+			static_cast<int>(3.0f), static_cast<int>(3.0f), 0.0f, 0x000000FF, kFillModeSolid);
+	}
+}
+
+

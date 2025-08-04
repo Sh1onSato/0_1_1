@@ -43,7 +43,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		0xFFFFFFFF,
 	};
 
-	
+	Calculation::Vector3 controlPoints[3] = {
+		{-1.0f, 0.58f, 1.0f,},
+		{1.76f, 1.0f, -0.3f,},
+		{0.94f, -0.7f, 2.3f,},
+	};
 
 	/*calculation->m1 =
 	{ 3.2f, 0.7f, 9.6f, 4.4f,
@@ -244,12 +248,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//	// 衝突なし、デフォルトの色に戻す
 		//	segment.color = 0xFFFFFFFF; // 白
 		//}
-		if (calculation->IsCollision(aabb1, segment)){
+		/*if (calculation->IsCollision(aabb1, segment)){
 			aabb1.color = 0xFF0000FF;
 		}
 		else{
 			aabb1.color = 0xFFFFFFFF;
-		}
+		}*/
 		//Calculation::Matrix4x4 worldMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, cameraRotate, cameraTranslate);
 		//Calculation::Matrix4x4 cameraMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, cameraPosition);
 		//Calculation::Matrix4x4 viewMatrix = calculation->Inverse(cameraMatrix);
@@ -275,10 +279,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(0, 0, 1280.0f , 720.0f, 0.0f, 1.0f);
 
 		ImGui::Begin("window");
-		ImGui::DragFloat3("aabb1.min", &aabb1.min.x, 0.01f);
-		ImGui::DragFloat3("aabb1.max", &aabb1.max.x, 0.01f);
-		ImGui::DragFloat3("segment.origin", &segment.origin.x, 0.01f);
-		ImGui::DragFloat3("segment.diff", &segment.diff.x, 0.01f);
+		ImGui::DragFloat3("controlPoints[0]", &controlPoints[0].x, 0.01f);
+		ImGui::DragFloat3("controlPoints[1]", &controlPoints[1].x, 0.01f);
+		ImGui::DragFloat3("controlPoints[2]", &controlPoints[2].x, 0.01f);
 		ImGui::End();
 
 
@@ -330,10 +333,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		/*calculation->DrawTriangle(triangle, ViewProjectionMatrix, viewportMatrix, triangle.color);*/
 
-		calculation->DrawAABB(aabb1, ViewProjectionMatrix, viewportMatrix, aabb1.color);
-		//calculation->DrawAABB(aabb2, ViewProjectionMatrix, viewportMatrix, aabb2.color);
+		/*calculation->DrawAABB(aabb1, ViewProjectionMatrix, viewportMatrix, aabb1.color);
+		*///calculation->DrawAABB(aabb2, ViewProjectionMatrix, viewportMatrix, aabb2.color);
 
-		Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), segment.color);
+		/*Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), segment.color);*/
+
+		calculation->DrawBezier(controlPoints[0], controlPoints[1], controlPoints[2], ViewProjectionMatrix, viewportMatrix, 0x003CB3FF);
 
 		/// ↑描画処理ここまで
 		///
