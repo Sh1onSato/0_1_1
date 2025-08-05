@@ -152,6 +152,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//aabb2.color = 0xFFFFFFFF;
 
+	Calculation::Vector3 translates[3] = {
+		{0.2f,1.0f,0.0f},
+		{0.4f,0.0f,0.0f},
+		{0.3f,0.0f,0.0f},
+	};
+
+	Calculation::Vector3 rotates[3] = {
+		{0.0f,0.0f,-0.8f},
+		{0.0f,0.0f,-1.4f},
+		{0.0f,0.0f,0.0f},
+	};
+
+	Calculation::Vector3 scales[3] = {
+		{1.0f,1.0f,1.0f},
+		{1.0f,1.0f,1.0f},
+		{1.0f,1.0f,1.0f},
+	};
+
+	uint32_t jointColors[3] = {
+	0xFF0000FF,
+	0x00FF00FF,
+	0x0000FFFF 
+	};
+
+	Calculation::Vector3 jointPositions[3];
+
+	Calculation::Vector3 screenA;
+	Calculation::Vector3 screenB;
 
 	int mouseX = 0;
 	int mouseY = 0;
@@ -209,9 +237,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Novice::GetMousePosition(&mouseX, &mouseY);
 		isRightMouseDown = Novice::IsPressMouse(1);
 
-		const float kRotateSensitivity = 0.001f;
+		//const float kRotateSensitivity = 0.001f;
 
-		if (isRightMouseDown)
+		/*if (isRightMouseDown)
 		{
 			float dx = float(mouseX - preMouseX);
 			float dy = float(mouseY - preMouseY);
@@ -226,7 +254,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		cameraPosition.translate.z += float(mouseWheel) * kRotateSensitivity;
 
-		Calculation::Vector3 diff_calc_vec = sphere[1].center - sphere[0].center;
+		Calculation::Vector3 diff_calc_vec = sphere[1].center - sphere[0].center;*/
+
+
+		Calculation::Matrix4x4 jointWorldMatrix[3];
+
+		jointWorldMatrix[0] = calculation->MakeAffineMatrix(scales[0], rotates[0], translates[0]);
+
+		Calculation::Matrix4x4 elbowLocal = calculation->MakeAffineMatrix(scales[1], rotates[1], translates[1]);
+
+		jointWorldMatrix[1] = calculation->Multiply(elbowLocal, jointWorldMatrix[0]);
+
+		Calculation::Matrix4x4 handLocal = calculation->MakeAffineMatrix(scales[2], rotates[2], translates[2]);
+
+
+		jointWorldMatrix[2] = calculation->Multiply(handLocal, jointWorldMatrix[1]);
+
 
 		/*float distance = glm::length(glm::vec3(diff_calc_vec.x, diff_calc_vec.y, diff_calc_vec.z));*/
 
@@ -279,9 +322,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(0, 0, 1280.0f , 720.0f, 0.0f, 1.0f);
 
 		ImGui::Begin("window");
-		ImGui::DragFloat3("controlPoints[0]", &controlPoints[0].x, 0.01f);
-		ImGui::DragFloat3("controlPoints[1]", &controlPoints[1].x, 0.01f);
-		ImGui::DragFloat3("controlPoints[2]", &controlPoints[2].x, 0.01f);
+		ImGui::DragFloat3("translates[0]", &translates[0].x, 0.01f);
+		ImGui::DragFloat3("rotates[0]", &rotates[0].x, 0.01f);
+		ImGui::DragFloat3("scales[0]", &scales[0].x, 0.01f);
+		ImGui::DragFloat3("translates[1]", &translates[1].x, 0.01f);
+		ImGui::DragFloat3("rotates[1]", &rotates[1].x, 0.01f);
+		ImGui::DragFloat3("scales[1]", &scales[1].x, 0.01f);
+		ImGui::DragFloat3("translates[2]", &translates[2].x, 0.01f);
+		ImGui::DragFloat3("rotates[2]", &rotates[2].x, 0.01f);
+		ImGui::DragFloat3("scales[2]", &scales[2].x, 0.01f);
 		ImGui::End();
 
 
@@ -325,9 +374,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/*calculation->DrawSphere(sphere[0], ViewProjectionMatrix, viewportMatrix, sphere[0].color);*/
 
 
-		Calculation::Vector3 start = calculation->Transform(calculation->Transform(segment.origin, ViewProjectionMatrix), viewportMatrix);
+		/*Calculation::Vector3 start = calculation->Transform(calculation->Transform(segment.origin, ViewProjectionMatrix), viewportMatrix);
 
-		Calculation::Vector3 end =calculation->Transform(calculation->Transform(calculation->Add(segment.origin, segment.diff), ViewProjectionMatrix), viewportMatrix);
+		Calculation::Vector3 end =calculation->Transform(calculation->Transform(calculation->Add(segment.origin, segment.diff), ViewProjectionMatrix), viewportMatrix);*/
 
 		//Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), segment.color);
 
@@ -338,7 +387,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		/*Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), segment.color);*/
 
-		calculation->DrawBezier(controlPoints[0], controlPoints[1], controlPoints[2], ViewProjectionMatrix, viewportMatrix, 0x003CB3FF);
+	/*	calculation->DrawBezier(controlPoints[0], controlPoints[1], controlPoints[2], ViewProjectionMatrix, viewportMatrix, 0x003CB3FF);*/
+
+		for (int i = 0; i < 2; ++i)
+		{
+			Calculation::Vector3 a = jointPositions[i];       // 現在の関節
+			Calculation::Vector3 b = jointPositions[i + 1];   // 次の関節
+
+			screenA = calculation->Transform(calculation->Transform(a, ViewProjectionMatrix), viewportMatrix);
+
+			screenB = calculation->Transform(calculation->Transform(b, ViewProjectionMatrix), viewportMatrix);
+
+			Novice::DrawLine(int(screenA.x), int(screenA.y), int(screenB.x), int(screenB.y), 0xFFFFFFFF);
+		}
+
+
+		for (int i = 0; i < 3; ++i)
+		{
+			jointPositions[i] = { jointWorldMatrix[i].m[3][0], jointWorldMatrix[i].m[3][1], jointWorldMatrix[i].m[3][2] };
+
+			Calculation::Sphere s;
+			s.center = jointPositions[i];
+			s.radius = 0.1f;
+			s.color = jointColors[i];
+
+			calculation->DrawSphere(s, ViewProjectionMatrix, viewportMatrix, s.color);
+		}
 
 		/// ↑描画処理ここまで
 		///
