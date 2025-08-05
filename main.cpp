@@ -9,6 +9,7 @@
 const char kWindowTitle[] = "LE2C_12_サトウ_シオン";
 
 
+
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -147,17 +148,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 
 		rotate.y -= 0.03f;*/
-		Calculation::Vector3 diff_calc_vec = sphere[1].center - sphere[0].center;
-
-		float distance = glm::length(glm::vec3(diff_calc_vec.x, diff_calc_vec.y, diff_calc_vec.z));
-
-		if(distance < sphere[0].radius + sphere[1].radius) {
-			// 衝突している場合の処理
-			sphere[0].color = 0xFFFF00FF; // 赤色に変更
+		if (calculation->IsCollision(sphere[0], sphere[1]))
+		{
+			sphere[0].color = 0xFF0000FF;
 		}
-		else {
-			// 衝突していない場合の処理
-			sphere[0].color = 0xFFFFFFFF; // 元の色に戻す
+		else
+		{
+			sphere[0].color = 0xFFFFFFFF;
 		}
 
 		//Calculation::Matrix4x4 worldMatrix = calculation->MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, cameraRotate, cameraTranslate);
