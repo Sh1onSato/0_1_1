@@ -244,7 +244,7 @@ Calculation::Matrix4x4 Calculation::MakeTranslationMatrix(const Vector3& Transla
 	return result;
 }
 
-Calculation::Vector3 Calculation::Transform(const Vector3& vector,const  Matrix4x4& matrix){
+Calculation::Vector3 Calculation::Transform(const Vector3& vector, const  Matrix4x4& matrix) {
 	Vector3 result;
 	// 行列とベクトルの積を計算
 	result.x = vector.x * matrix.m[0][0] + vector.y * matrix.m[1][0] + vector.z * matrix.m[2][0] + matrix.m[3][0];
@@ -508,14 +508,14 @@ void Calculation::DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjecti
 	}
 }
 
-void Calculation::DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix){
+void Calculation::DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix) {
 	const float  kGridHalfWidth = 2.0f;
 
 	const uint32_t kSubdivision = 10;
 
 	const float kGridEvery = (kGridHalfWidth * 2.0f) / float(kSubdivision);
 
-	for (uint32_t xIndex = 0; xIndex <= kSubdivision; ++xIndex){
+	for (uint32_t xIndex = 0; xIndex <= kSubdivision; ++xIndex) {
 		float x = -kGridHalfWidth + kGridEvery * xIndex;
 
 		Vector3 start = { x, 0.0f, -kGridHalfWidth };
@@ -528,7 +528,7 @@ void Calculation::DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x
 		Novice::DrawLine(int(screenStart.x), int(screenStart.y), int(screenEnd.x), int(screenEnd.y), 0xAAAAAAFF);
 	}
 
-	for (uint32_t zIndex = 0; zIndex <= kSubdivision; ++zIndex){
+	for (uint32_t zIndex = 0; zIndex <= kSubdivision; ++zIndex) {
 
 		float z = -kGridHalfWidth + kGridEvery * zIndex;
 
