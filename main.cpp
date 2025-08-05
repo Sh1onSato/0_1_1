@@ -152,7 +152,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//aabb2.color = 0xFFFFFFFF;
 
-	Calculation::Vector3 translates[3] = {
+	/*Calculation::Vector3 translates[3] = {
 		{0.2f,1.0f,0.0f},
 		{0.4f,0.0f,0.0f},
 		{0.3f,0.0f,0.0f},
@@ -179,7 +179,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Calculation::Vector3 jointPositions[3];
 
 	Calculation::Vector3 screenA;
-	Calculation::Vector3 screenB;
+	Calculation::Vector3 screenB;*/
+
+	Calculation::Vector3 a{ 0.2f,1.0f,0.0f };
+	Calculation::Vector3 b{ 2.4f,3.1f,1.2f };
+	Calculation::Vector3 c = a + b;
+	Calculation::Vector3 d = a - b;
+	Calculation::Vector3 e = a * 2.4f;
+	Calculation::Vector3 rotate{ 0.4f,1.43f,-0.8f };
+	Calculation::Matrix4x4 rotateXMatrix = calculation->MakeRotationXMatrix(rotate.x);
+	Calculation::Matrix4x4 rotateYMatrix = calculation->MakeRotationYMatrix(rotate.y);
+	Calculation::Matrix4x4 rotateZMatrix = calculation->MakeRotationZMatrix(rotate.z);
+	Calculation::Matrix4x4 rotateMatrix = rotateXMatrix * rotateYMatrix * rotateZMatrix;
 
 	int mouseX = 0;
 	int mouseY = 0;
@@ -257,7 +268,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Calculation::Vector3 diff_calc_vec = sphere[1].center - sphere[0].center;*/
 
 
-		Calculation::Matrix4x4 jointWorldMatrix[3];
+		/*Calculation::Matrix4x4 jointWorldMatrix[3];
 
 		jointWorldMatrix[0] = calculation->MakeAffineMatrix(scales[0], rotates[0], translates[0]);
 
@@ -269,7 +280,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 		jointWorldMatrix[2] = calculation->Multiply(handLocal, jointWorldMatrix[1]);
-
+*/
 
 		/*float distance = glm::length(glm::vec3(diff_calc_vec.x, diff_calc_vec.y, diff_calc_vec.z));*/
 
@@ -322,15 +333,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(0, 0, 1280.0f , 720.0f, 0.0f, 1.0f);
 
 		ImGui::Begin("window");
-		ImGui::DragFloat3("translates[0]", &translates[0].x, 0.01f);
-		ImGui::DragFloat3("rotates[0]", &rotates[0].x, 0.01f);
-		ImGui::DragFloat3("scales[0]", &scales[0].x, 0.01f);
-		ImGui::DragFloat3("translates[1]", &translates[1].x, 0.01f);
-		ImGui::DragFloat3("rotates[1]", &rotates[1].x, 0.01f);
-		ImGui::DragFloat3("scales[1]", &scales[1].x, 0.01f);
-		ImGui::DragFloat3("translates[2]", &translates[2].x, 0.01f);
-		ImGui::DragFloat3("rotates[2]", &rotates[2].x, 0.01f);
-		ImGui::DragFloat3("scales[2]", &scales[2].x, 0.01f);
+		ImGui::Text("c:%f,%f,%f", c.x, c.y, c.z);
+		ImGui::Text("c:%f,%f,%f", d.x, d.y, d.z);
+		ImGui::Text("c:%f,%f,%f", e.x, e.y, e.z);
+		ImGui::Text(
+			"matrix:\n%f, %f, %f,%f\n%f, %f, %f, %f\n%f, %f, %f, %f\n%f, %f, %f, %f\n",
+			rotateMatrix.m[0][0], rotateMatrix.m[0][1], rotateMatrix.m[0][2],
+			rotateMatrix.m[0][3], rotateMatrix.m[1][0], rotateMatrix.m[1][1],
+			rotateMatrix.m[1][2], rotateMatrix.m[1][3], rotateMatrix.m[2][0],
+			rotateMatrix.m[2][1], rotateMatrix.m[2][2], rotateMatrix.m[2][3],
+			rotateMatrix.m[3][0], rotateMatrix.m[3][1], rotateMatrix.m[3][2],
+			rotateMatrix.m[3][3]);
 		ImGui::End();
 
 
@@ -369,7 +382,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	/*	calculation->DrawPlane(plane, ViewProjectionMatrix, viewportMatrix, plane.color);*/
 
 
-		calculation->DrawGrid(ViewProjectionMatrix, viewportMatrix);
+		/*calculation->DrawGrid(ViewProjectionMatrix, viewportMatrix);*/
 
 		/*calculation->DrawSphere(sphere[0], ViewProjectionMatrix, viewportMatrix, sphere[0].color);*/
 
@@ -389,30 +402,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	/*	calculation->DrawBezier(controlPoints[0], controlPoints[1], controlPoints[2], ViewProjectionMatrix, viewportMatrix, 0x003CB3FF);*/
 
-		for (int i = 0; i < 2; ++i)
-		{
-			Calculation::Vector3 a = jointPositions[i];       // 現在の関節
-			Calculation::Vector3 b = jointPositions[i + 1];   // 次の関節
+		//for (int i = 0; i < 2; ++i)
+		//{
+		//	Calculation::Vector3 a = jointPositions[i];       // 現在の関節
+		//	Calculation::Vector3 b = jointPositions[i + 1];   // 次の関節
 
-			screenA = calculation->Transform(calculation->Transform(a, ViewProjectionMatrix), viewportMatrix);
+		//	screenA = calculation->Transform(calculation->Transform(a, ViewProjectionMatrix), viewportMatrix);
 
-			screenB = calculation->Transform(calculation->Transform(b, ViewProjectionMatrix), viewportMatrix);
+		//	screenB = calculation->Transform(calculation->Transform(b, ViewProjectionMatrix), viewportMatrix);
 
-			Novice::DrawLine(int(screenA.x), int(screenA.y), int(screenB.x), int(screenB.y), 0xFFFFFFFF);
-		}
+		//	Novice::DrawLine(int(screenA.x), int(screenA.y), int(screenB.x), int(screenB.y), 0xFFFFFFFF);
+		//}
 
 
-		for (int i = 0; i < 3; ++i)
-		{
-			jointPositions[i] = { jointWorldMatrix[i].m[3][0], jointWorldMatrix[i].m[3][1], jointWorldMatrix[i].m[3][2] };
+		//for (int i = 0; i < 3; ++i)
+		//{
+		//	jointPositions[i] = { jointWorldMatrix[i].m[3][0], jointWorldMatrix[i].m[3][1], jointWorldMatrix[i].m[3][2] };
 
-			Calculation::Sphere s;
-			s.center = jointPositions[i];
-			s.radius = 0.1f;
-			s.color = jointColors[i];
+		//	Calculation::Sphere s;
+		//	s.center = jointPositions[i];
+		//	s.radius = 0.1f;
+		//	s.color = jointColors[i];
 
-			calculation->DrawSphere(s, ViewProjectionMatrix, viewportMatrix, s.color);
-		}
+		//	calculation->DrawSphere(s, ViewProjectionMatrix, viewportMatrix, s.color);
+		//}
 
 		/// ↑描画処理ここまで
 		///
