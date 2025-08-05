@@ -47,7 +47,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Calculation::Matrix4x4 perspectiveMatrix = calculation->MakePerspectiveFovMatrix(0.63f, 1.33f, 0.1f, 1000.0f);
 	Calculation::Matrix4x4 viewportMatrix = calculation->MakeViewportMatrix(100.0f, 200.0f, 600.0, 300.0f,0.0f, 1.0f);*/
 
-	Calculation::Vector3 v1 = { 1.2f,-3.9f,2.0f };
+	Calculation::Vector3 v1 = { 1.2f,-3.9f,2.5f };
 	Calculation::Vector3 v2 = { 2.8f,0.4f,-1.3f };
 	Calculation::Vector3 cross = calculation->Cross(v1, v2);
 
@@ -57,8 +57,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Calculation::Vector3 kLocalVertices[3] = {
 		{ 0.0f, 1.0f, 0.0f },
-		{ -1.0f, -1.0f, 0.0f },
-		{ 1.0f, -1.0f, 0.0f }
+		{ 0.5f, -0.5f, 0.0f },
+		{ -0.5f, -0.5f, 0.0f }
 	};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
